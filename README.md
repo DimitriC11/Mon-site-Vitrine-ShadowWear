@@ -3,7 +3,7 @@
 
 ## Site Web Gestion des stages https://gestion-stages-bts.ct.ws/?i=1
 
-# j'ai essayé de push mon site vitrine mais celui-ci est trop lourd donc si vous pouvez passé en local mardin prochain voicis un aperçu...
+#### j'ai essayé de push mon site vitrine mais celui-ci est trop lourd donc si vous pouvez passé en local mardin prochain voicis un aperçu...
 
 <img width="1630" height="911" alt="image" src="https://github.com/user-attachments/assets/1a9e479b-7ee2-4028-89c6-0e32a307c81a" />
 <img width="1618" height="872" alt="image" src="https://github.com/user-attachments/assets/813c12a7-9809-4058-8ab8-fb20ad181f3c" />
