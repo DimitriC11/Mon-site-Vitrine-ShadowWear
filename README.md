@@ -1,7 +1,6 @@
 # Mon-site-Vitrine-ShadowWear
 ## Site Web Vitrine ShadowWear (vêtement) 
 
-## Site Web Gestion des stages https://gestion-stages-bts.ct.ws/?i=1
 
 #### J’ai essayé de pousser (push) mon site vitrine sur GitHub, mais celui-ci est trop volumineux et dépasse la taille autorisée. Si vous le pouvez, pourriez-vous passer jeter un coup d’œil mardi prochain ?
 ## Voici un aperçu...
