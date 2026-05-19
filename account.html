@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -240,3 +241,247 @@
     </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon compte | ShadowWear</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/auth.css">
+</head>
+<body>
+    <!-- Overlay texture -->
+    <div class="grunge-overlay"></div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- En-tête -->
+            <div class="auth-header">
+                <h1 class="auth-title">My Account</h1>
+                <p class="auth-subtitle">Gestion de votre profil ShadowWear</p>
+            </div>
+
+            <!-- Informations utilisateur -->
+            <div class="user-profile">
+                <div class="profile-section">
+                    <h2>Informations de profil</h2>
+                    <p><strong>Nom :</strong> <span id="userName"></span></p>
+                    <p><strong>Email :</strong> <span id="userEmail"></span></p>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="profile-actions">
+                    <button id="editButton" class="auth-button auth-button-secondary">
+                        Modifier le profil
+                    </button>
+                    <button id="logoutButton" class="auth-button auth-button-danger">
+                        Se déconnecter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section édition (cachée par défaut) -->
+            <div id="editSection" class="edit-section" style="display: none;">
+                <h2>Modifier vos informations</h2>
+                <form id="editForm" class="auth-form">
+                    <!-- Champ Nom -->
+                    <div class="form-group">
+                        <label for="editName">Nom complet</label>
+                        <input 
+                            type="text" 
+                            id="editName" 
+                            name="editName" 
+                            required
+                        >
+                    </div>
+
+                    <!-- Champ Email -->
+                    <div class="form-group">
+                        <label for="editEmail">Email</label>
+                        <input 
+                            type="email" 
+                            id="editEmail" 
+                            name="editEmail" 
+                            required
+                        >
+                    </div>
+
+                    <!-- Nouveau mot de passe -->
+                    <div class="form-group">
+                        <label for="newPassword">Nouveau mot de passe (optionnel)</label>
+                        <input 
+                            type="password" 
+                            id="newPassword" 
+                            name="newPassword" 
+                            placeholder="Laisser vide pour ne pas changer"
+                        >
+                        <span class="error-message" id="passwordError"></span>
+                    </div>
+
+                    <!-- Message d'erreur -->
+                    <div id="editError" class="alert alert-error" style="display: none;"></div>
+
+                    <!-- Message de succès -->
+                    <div id="editSuccess" class="alert alert-success" style="display: none;"></div>
+
+                    <!-- Boutons -->
+                    <div class="form-actions">
+                        <button type="submit" class="auth-button">Enregistrer les modifications</button>
+                        <button type="button" id="cancelButton" class="auth-button auth-button-secondary">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lien retour -->
+            <div class="auth-footer">
+                <p><a href="index.html" class="auth-link">← Retour au site</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script d'authentification -->
+    <script src="js/auth.js"></script>
+    <script>
+        // ============================================
+        // GESTION DE LA PAGE DU COMPTE UTILISATEUR
+        // ============================================
+
+        // Vérifier si l'utilisateur est connecté
+        window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            
+            if (!currentUser) {
+                // Rediriger vers la page de connexion si pas connecté
+                alert('Vous devez être connecté pour accéder à cette page');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Afficher les informations de l'utilisateur
+            const user = JSON.parse(currentUser);
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userEmail').textContent = user.email;
+
+            // Pré-remplir le formulaire d'édition
+            document.getElementById('editName').value = user.name;
+            document.getElementById('editEmail').value = user.email;
+        });
+
+        // Bouton "Modifier le profil"
+        document.getElementById('editButton').addEventListener('click', function() {
+            document.getElementById('editSection').style.display = 'block';
+            this.style.display = 'none';
+        });
+
+        // Bouton "Annuler"
+        document.getElementById('cancelButton').addEventListener('click', function() {
+            document.getElementById('editSection').style.display = 'none';
+            document.getElementById('editButton').style.display = 'block';
+            resetEditMessages();
+        });
+
+        // Formulaire d'édition
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            resetEditMessages();
+
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+            const newName = document.getElementById('editName').value.trim();
+            const newEmail = document.getElementById('editEmail').value.trim();
+            const newPassword = document.getElementById('newPassword').value;
+
+            // Valider le nom
+            if (!newName || newName.length < 3) {
+                document.getElementById('editError').textContent = 
+                    'Le nom doit contenir au moins 3 caractères';
+                document.getElementById('editError').style.display = 'block';
+                return;
+            }
+
+            // Valider l'email
+            if (!newEmail || !isValidEmail(newEmail)) {
+                document.getElementById('editError').textContent = 
+                    'Veuillez entrer un email valide';
+                document.getElementById('editError').style.display = 'block';
+                return;
+            }
+
+            // Valider le mot de passe s'il est renseigné
+            if (newPassword && newPassword.length < 6) {
+                document.getElementById('passwordError').textContent = 
+                    'Le mot de passe doit contenir au moins 6 caractères';
+                return;
+            }
+
+            // Récupérer tous les utilisateurs
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Chercher l'utilisateur actuel
+            const userIndex = users.findIndex(u => u.email === currentUser.email);
+
+            if (userIndex === -1) {
+                document.getElementById('editError').textContent = 
+                    'Erreur : utilisateur non trouvé';
+                document.getElementById('editError').style.display = 'block';
+                return;
+            }
+
+            // Mettre à jour les données
+            users[userIndex].name = newName;
+            users[userIndex].email = newEmail;
+            if (newPassword) {
+                users[userIndex].password = newPassword;
+            }
+
+            // Sauvegarder les utilisateurs dans localStorage
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // Mettre à jour l'utilisateur actuel
+            const updatedUser = users[userIndex];
+            sessionStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
+            // Afficher le message de succès
+            document.getElementById('editSuccess').textContent = 
+                'Profil mis à jour avec succès !';
+            document.getElementById('editSuccess').style.display = 'block';
+
+            // Mettre à jour l'affichage
+            document.getElementById('userName').textContent = newName;
+            document.getElementById('userEmail').textContent = newEmail;
+
+            // Masquer la section d'édition après 2 secondes
+            setTimeout(() => {
+                document.getElementById('editSection').style.display = 'none';
+                document.getElementById('editButton').style.display = 'block';
+            }, 2000);
+        });
+
+        // Bouton "Se déconnecter"
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            // Supprimer l'utilisateur actuel
+            sessionStorage.removeItem('currentUser');
+            
+            // Rediriger vers la page de connexion
+            alert('Vous avez été déconnecté');
+            window.location.href = 'login.html';
+        });
+
+        // Fonction pour réinitialiser les messages d'erreur/succès
+        function resetEditMessages() {
+            document.getElementById('editError').textContent = '';
+            document.getElementById('editError').style.display = 'none';
+            document.getElementById('editSuccess').textContent = '';
+            document.getElementById('editSuccess').style.display = 'none';
+            document.getElementById('passwordError').textContent = '';
+        }
+    </script>
+</body>
+</html>
+>>>>>>> 0e339773d9bf53d79b2795970d8df60fd39e4203

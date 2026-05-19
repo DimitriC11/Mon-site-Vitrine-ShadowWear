@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -225,3 +226,232 @@
     </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialisation des comptes | ShadowWear</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/auth.css">
+    <style>
+        .info-box {
+            background: #2a2a2a;
+            border-left: 4px solid #4CAF50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box h3 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+        .credentials {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .credentials p {
+            margin: 5px 0;
+            color: #e0e0e0;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .warning {
+            background: #ff9800;
+            color: #000;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .auth-button.secondary {
+            background: #666;
+        }
+        .auth-button.secondary:hover {
+            background: #555;
+        }
+        .auth-button.danger {
+            background: #f44336;
+        }
+        .auth-button.danger:hover {
+            background: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="grunge-overlay"></div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 class="auth-title">🔧 Initialisation des comptes</h1>
+                <p class="auth-subtitle">Configuration des utilisateurs par défaut</p>
+            </div>
+
+            <div id="statusMessage"></div>
+
+            <div class="info-box">
+                <h3>📋 Comptes à créer</h3>
+                
+                <div class="credentials">
+                    <h4 style="color: #ff5722; margin-top: 0;">👑 Compte Administrateur</h4>
+                    <p>📧 Email: <strong>admin@shadowwear.com</strong></p>
+                    <p>🔑 Mot de passe: <strong>admin123</strong></p>
+                </div>
+
+                <div class="credentials">
+                    <h4 style="color: #2196F3; margin-top: 0;">👤 Compte Utilisateur</h4>
+                    <p>📧 Email: <strong>user@shadowwear.com</strong></p>
+                    <p>🔑 Mot de passe: <strong>user123</strong></p>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="initBtn" class="auth-button">
+                    🚀 Créer les comptes par défaut
+                </button>
+                <button id="showUsersBtn" class="auth-button secondary">
+                    👥 Afficher les utilisateurs
+                </button>
+                <button id="resetBtn" class="auth-button danger">
+                    🗑️ Réinitialiser tout
+                </button>
+            </div>
+
+            <div id="usersList" style="margin-top: 20px;"></div>
+
+            <div class="auth-footer">
+                <p>
+                    <a href="login.html" class="auth-link">← Retour à la connexion</a> | 
+                    <a href="register.html" class="auth-link">Créer un nouveau compte</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        const statusMessage = document.getElementById('statusMessage');
+        const initBtn = document.getElementById('initBtn');
+        const showUsersBtn = document.getElementById('showUsersBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const usersList = document.getElementById('usersList');
+
+        // Fonction pour afficher un message
+        function showMessage(message, type = 'success') {
+            statusMessage.innerHTML = `
+                <div class="alert alert-${type === 'success' ? 'success' : 'error'}" style="display: block; margin-bottom: 20px;">
+                    ${message}
+                </div>
+            `;
+        }
+
+        // Initialiser les comptes par défaut
+        initBtn.addEventListener('click', function() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            let message = '';
+            let created = 0;
+
+            // Vérifier et créer le compte admin
+            if (!userExists('admin@shadowwear.com')) {
+                registerUser('Administrateur', 'admin@shadowwear.com', 'admin123', 'admin');
+                created++;
+                console.log('✅ Compte admin créé');
+            } else {
+                console.log('ℹ️ Compte admin existe déjà');
+            }
+
+            // Vérifier et créer le compte utilisateur
+            if (!userExists('user@shadowwear.com')) {
+                registerUser('Utilisateur Test', 'user@shadowwear.com', 'user123', 'user');
+                created++;
+                console.log('✅ Compte utilisateur créé');
+            } else {
+                console.log('ℹ️ Compte utilisateur existe déjà');
+            }
+
+            if (created === 2) {
+                showMessage('✅ Les 2 comptes ont été créés avec succès !', 'success');
+            } else if (created === 1) {
+                showMessage('✅ 1 compte créé. L\'autre existait déjà.', 'success');
+            } else {
+                showMessage('ℹ️ Les comptes existent déjà. Aucune action nécessaire.', 'success');
+            }
+
+            // Afficher automatiquement la liste
+            showUsers();
+        });
+
+        // Afficher tous les utilisateurs
+        showUsersBtn.addEventListener('click', showUsers);
+
+        function showUsers() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            if (users.length === 0) {
+                usersList.innerHTML = `
+                    <div class="warning">
+                        ⚠️ Aucun utilisateur trouvé. Cliquez sur "Créer les comptes par défaut" pour initialiser.
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="info-box"><h3>👥 Utilisateurs enregistrés (' + users.length + ')</h3>';
+            
+            users.forEach(user => {
+                const roleIcon = user.role === 'admin' ? '👑' : '👤';
+                const roleColor = user.role === 'admin' ? '#ff5722' : '#2196F3';
+                
+                html += `
+                    <div class="credentials">
+                        <h4 style="color: ${roleColor}; margin-top: 0;">
+                            ${roleIcon} ${user.name} ${user.role === 'admin' ? '(Admin)' : ''}
+                        </h4>
+                        <p>📧 Email: <strong>${user.email}</strong></p>
+                        <p>🔑 Mot de passe: <strong>${user.password}</strong></p>
+                        <p style="font-size: 0.85em; color: #999;">ID: ${user.id} | Créé le: ${new Date(user.createdAt).toLocaleString('fr-FR')}</p>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            usersList.innerHTML = html;
+        }
+
+        // Réinitialiser tous les utilisateurs
+        resetBtn.addEventListener('click', function() {
+            if (confirm('⚠️ ATTENTION : Cette action supprimera TOUS les utilisateurs enregistrés. Êtes-vous sûr ?')) {
+                localStorage.removeItem('users');
+                sessionStorage.removeItem('currentUser');
+                showMessage('🗑️ Tous les utilisateurs ont été supprimés.', 'success');
+                usersList.innerHTML = '';
+                console.log('Base de données réinitialisée');
+            }
+        });
+
+        // Vérifier s'il y a des utilisateurs au chargement
+        window.addEventListener('load', function() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            if (users.length === 0) {
+                showMessage('ℹ️ Aucun utilisateur trouvé. Cliquez sur "Créer les comptes par défaut" pour commencer.', 'success');
+            } else {
+                showMessage(`✅ ${users.length} utilisateur(s) déjà enregistré(s).`, 'success');
+            }
+        });
+    </script>
+</body>
+</html>
+>>>>>>> 0e339773d9bf53d79b2795970d8df60fd39e4203
