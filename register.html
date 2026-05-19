@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription | ShadowWear</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/auth.css">
+</head>
+<body>
+    <!-- Overlay texture (optionnel) -->
+    <div class="grunge-overlay"></div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- En-tête -->
+            <div class="auth-header">
+                <h1 class="auth-title">Création de compte</h1>
+                <p class="auth-subtitle">Rejoignez la communauté ShadowWear</p>
+            </div>
+
+            <!-- Formulaire d'inscription -->
+            <form id="registerForm" class="auth-form">
+                <!-- Champ Nom -->
+                <div class="form-group">
+                    <label for="name">Nom complet</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        placeholder="Jean Dupont"
+                        required
+                    >
+                    <span class="error-message" id="nameError"></span>
+                </div>
+
+                <!-- Champ Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="test@example.com"
+                        required
+                    >
+                    <span class="error-message" id="emailError"></span>
+                </div>
+
+                <!-- Champ Mot de passe -->
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="••••••••"
+                        required
+                    >
+                    <span class="error-message" id="passwordError"></span>
+                </div>
+
+                <!-- Champ Confirmation mot de passe -->
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmer le mot de passe</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirmPassword" 
+                        placeholder="••••••••"
+                        required
+                    >
+                    <span class="error-message" id="confirmPasswordError"></span>
+                </div>
+
+                <!-- Message d'erreur général -->
+                <div id="generalError" class="alert alert-error"></div>
+
+                <!-- Message de succès -->
+                <div id="successMessage" class="alert alert-success"></div>
+
+                <!-- Bouton d'inscription -->
+                <button type="submit" class="auth-button">S'inscrire</button>
+            </form>
+
+            <!-- Lien vers la connexion -->
+            <div class="auth-footer">
+                <p>Vous avez déjà un compte ? 
+                    <a href="login.html" class="auth-link">Connectez-vous ici</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script d'authentification -->
+    <script src="js/auth.js"></script>
+    <script>
+        // Gestion du formulaire d'inscription
+        const registerForm = document.getElementById('registerForm');
+
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêche l'envoi du formulaire
+
+            // Récupérer les valeurs du formulaire
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Réinitialiser les messages d'erreur
+            resetErrorMessages();
+
+            // Valider les données
+            const errors = validateRegistration(name, email, password, confirmPassword);
+
+            // S'il y a des erreurs, les afficher
+            if (errors.length > 0) {
+                displayErrors(errors);
+                return;
+            }
+
+            // Enregistrer l'utilisateur
+            if (registerUser(name, email, password)) {
+                // Afficher le message de succès
+                document.getElementById('successMessage').textContent = 
+                    'Inscription réussie ! Redirection vers la connexion...';
+                document.getElementById('successMessage').style.display = 'block';
+
+                // Rediriger vers la page de connexion après 2 secondes
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
+        });
+
+        // Fonction pour valider les données d'inscription
+        function validateRegistration(name, email, password, confirmPassword) {
+            const errors = [];
+
+            // Vérifier le nom
+            if (!name || name.length < 3) {
+                errors.push('nom');
+            }
+
+            // Vérifier l'email
+            if (!email || !isValidEmail(email)) {
+                errors.push('email');
+            }
+
+            // Vérifier si l'email existe déjà
+            if (userExists(email)) {
+                errors.push('emailExists');
+            }
+
+            // Vérifier le mot de passe
+            if (!password || password.length < 6) {
+                errors.push('password');
+            }
+
+            // Vérifier la confirmation du mot de passe
+            if (password !== confirmPassword) {
+                errors.push('confirmPassword');
+            }
+
+            return errors;
+        }
+
+        // Fonction pour afficher les erreurs
+        function displayErrors(errors) {
+            errors.forEach(error => {
+                switch(error) {
+                    case 'nom':
+                        document.getElementById('nameError').textContent = 
+                            'Le nom doit contenir au moins 3 caractères';
+                        break;
+                    case 'email':
+                        document.getElementById('emailError').textContent = 
+                            'Veuillez entrer un email valide';
+                        break;
+                    case 'emailExists':
+                        document.getElementById('emailError').textContent = 
+                            'Cet email est déjà utilisé';
+                        break;
+                    case 'password':
+                        document.getElementById('passwordError').textContent = 
+                            'Le mot de passe doit contenir au moins 6 caractères';
+                        break;
+                    case 'confirmPassword':
+                        document.getElementById('confirmPasswordError').textContent = 
+                            'Les mots de passe ne correspondent pas';
+                        break;
+                }
+            });
+        }
+
+        // Fonction pour réinitialiser les messages d'erreur
+        function resetErrorMessages() {
+            document.getElementById('nameError').textContent = '';
+            document.getElementById('emailError').textContent = '';
+            document.getElementById('passwordError').textContent = '';
+            document.getElementById('confirmPasswordError').textContent = '';
+            document.getElementById('generalError').textContent = '';
+            document.getElementById('generalError').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

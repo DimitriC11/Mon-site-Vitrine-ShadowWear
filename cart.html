@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panier | ShadowWear</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/auth.css">
+    <style>
+        .cart-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .cart-header {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 1) 100%);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .cart-title {
+            margin: 0;
+            color: white;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .product-name {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            color: #10b981;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .product-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .quantity-input {
+            width: 60px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .add-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #a7f3d0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: rgba(16, 185, 129, 0.6);
+        }
+
+        .cart-summary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .no-items {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.6);
+            color: #a7f3d0;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            background: rgba(16, 185, 129, 0.4);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="grunge-overlay"></div>
+
+    <div class="cart-container">
+        <div class="cart-header">
+            <h1 class="cart-title">🛒 Panier ShadowWear</h1>
+            <p style="margin: 5px 0; color: #999; font-size: 13px;">Sélectionnez les produits et passez votre commande</p>
+        </div>
+
+        <h2 style="color: #fff; margin-bottom: 20px;">Produits Disponibles</h2>
+        <div class="products-grid" id="productsGrid"></div>
+
+        <h2 style="color: #fff; margin-bottom: 20px;">Récapitulatif du Panier</h2>
+        <div class="cart-summary">
+            <div id="cartItems"></div>
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">€0,00</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" disabled>Passer la Commande</button>
+        </div>
+
+        <div class="auth-footer">
+            <p><a href="index.html" class="auth-link">← Retour au site</a></p>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script>
+        // Produits disponibles
+        const products = [
+            { id: 1, name: 'T-Shirt ShadowWear', price: 29.99 },
+            { id: 2, name: 'Hoodie Noir Premium', price: 59.99 },
+            { id: 3, name: 'Pantalon Cargo', price: 79.99 },
+            { id: 4, name: 'Casquette Brodée', price: 19.99 },
+            { id: 5, name: 'Sweatshirt Logo', price: 49.99 },
+            { id: 6, name: 'Veste Bomber', price: 89.99 }
+        ];
+
+        // État du panier
+        let cart = [];
+        let currentUserId = null;
+        let currentUserEmail = null;
+
+        // Initialisation
+        window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            
+            if (!currentUser) {
+                alert('Vous devez être connecté');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = JSON.parse(currentUser);
+            currentUserId = user.id;
+            currentUserEmail = user.email;
+
+            // Charger le panier depuis localStorage
+            cart = OrdersManager.getCart(currentUserId);
+
+            renderProducts();
+            updateCart();
+        });
+
+        /**
+         * Affiche les produits disponibles
+         */
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const quantityInputs = {};
+
+            grid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">€${product.price.toFixed(2).replace('.', ',')}</div>
+                    <div class="product-controls">
+                        <input 
+                            type="number" 
+                            class="quantity-input" 
+                            id="qty-${product.id}" 
+                            value="1" 
+                            min="1" 
+                            max="10"
+                        />
+                        <button class="add-btn" onclick="addToCart(${product.id})">
+                            Ajouter
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Ajoute un produit au panier
+         */
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const quantityInput = document.getElementById(`qty-${productId}`);
+            const quantity = parseInt(quantityInput.value) || 1;
+
+            OrdersManager.addToCart(currentUserId, {
+                productId: product.id,
+                productName: product.name,
+                price: product.price,
+                quantity: quantity
+            });
+
+            cart = OrdersManager.getCart(currentUserId);
+            updateCart();
+            quantityInput.value = 1;
+        }
+
+        /**
+         * Met à jour l'affichage du panier
+         */
+        function updateCart() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '<p class="no-items">Votre panier est vide</p>';
+                checkoutBtn.disabled = true;
+                document.getElementById('cartTotal').textContent = '€0,00';
+                return;
+            }
+
+            let total = 0;
+            let html = '';
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+
+                html += `
+                    <div class="cart-item">
+                        <div>
+                            <div style="color: #fff; margin-bottom: 5px;">${item.productName}</div>
+                            <div style="color: #999; font-size: 12px;">${item.quantity} × €${item.price.toFixed(2).replace('.', ',')}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="color: #10b981; font-weight: 600;">€${itemTotal.toFixed(2).replace('.', ',')}</div>
+                            <button 
+                                onclick="removeFromCart(${index})"
+                                style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fecaca; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;"
+                            >
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cartItemsDiv.innerHTML = html;
+            document.getElementById('cartTotal').textContent = '€' + total.toFixed(2).replace('.', ',');
+            checkoutBtn.disabled = cart.length === 0;
+        }
+
+        /**
+         * Supprime un article du panier
+         */
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            localStorage.setItem(`cart_${currentUserId}`, JSON.stringify(cart));
+            OrdersManager.init(); // Réinitialiser
+            cart = OrdersManager.getCart(currentUserId);
+            updateCart();
+        }
+
+        /**
+         * Passe la commande
+         */
+        document.getElementById('checkoutBtn').addEventListener('click', function() {
+            if (cart.length === 0) {
+                alert('Votre panier est vide');
+                return;
+            }
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const order = OrdersManager.createOrder(
+                currentUserId,
+                currentUserEmail,
+                cart,
+                total,
+                'pending'
+            );
+
+            alert(`✅ Commande créée!\n\nID: #${order.id}\nMontant: €${total.toFixed(2).replace('.', ',')}\nStatut: En attente de paiement`);
+            
+            cart = [];
+            updateCart();
+        });
+    </script>
+</body>
+</html>

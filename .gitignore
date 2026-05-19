@@ -1,0 +1,34 @@
+# Backups et copies
+Back-up/
+CLERC_Dimitri_SIO-Site_Web_Vitrine - Copie.html
+*.7z
+*.zip
+
+# Fichiers locaux/config
+url localhost.txt
+Hebergement et domaine/
+
+# Fichiers pédagogiques/internes
+Cahier des charges/
+Fiche de révision HTMLCSS/
+Fiches de postes/
+Organigramme/
+
+# Node modules et dépendances
+node_modules/
+npm-debug.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Bases de données locales (ne pas versionner les données sensibles)
+*.db
+*.sqlite

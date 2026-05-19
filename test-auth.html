@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentification | ShadowWear</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .subtitle {
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .test-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .test-button {
+            padding: 10px 15px;
+            background: rgba(100, 150, 255, 0.2);
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            color: #93c5fd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .test-button:hover {
+            background: rgba(100, 150, 255, 0.3);
+            border-color: rgba(100, 150, 255, 0.6);
+        }
+
+        .test-button.danger {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fecaca;
+        }
+
+        .test-button.danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        .test-button.success {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #a7f3d0;
+        }
+
+        .test-button.success:hover {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: rgba(16, 185, 129, 0.6);
+        }
+
+        .output {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            color: #10b981;
+        }
+
+        .output.error {
+            color: #fecaca;
+        }
+
+        .output.warning {
+            color: #fcd34d;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .link {
+            color: #93c5fd;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Authentification ShadowWear</h1>
+        <p class="subtitle">Vérifiez le fonctionnement du système d'authentification</p>
+
+        <div class="info-box">
+            ℹ️ Cette page vous permet de tester tous les éléments du système d'authentification avec localStorage.
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Utilisateurs enregistrés</h3>
+                <div class="value" id="statUsers">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Administrateurs</h3>
+                <div class="value" id="statAdmins">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Utilisateurs standards</h3>
+                <div class="value" id="statStandard">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Utilisateur connecté</h3>
+                <div class="value" id="statLogged">Non</div>
+            </div>
+        </div>
+
+        <!-- Tests de base -->
+        <div class="section">
+            <h2>Tests de base</h2>
+            <div class="test-group">
+                <button class="test-button success" onclick="testRegisterUser()">✅ Créer utilisateur test</button>
+                <button class="test-button success" onclick="testCreateAdmin()">✅ Créer admin test</button>
+                <button class="test-button" onclick="testAuthenticateUser()">🔐 Tester authentification</button>
+                <button class="test-button" onclick="testGetUser()">📋 Récupérer utilisateur</button>
+                <button class="test-button" onclick="testChangePassword()">🔑 Changer mot de passe</button>
+                <button class="test-button danger" onclick="testDeleteUser()">🗑️ Supprimer utilisateur</button>
+            </div>
+            <div id="output" class="output"></div>
+        </div>
+
+        <!-- Affichage des utilisateurs -->
+        <div class="section">
+            <h2>Utilisateurs enregistrés</h2>
+            <div class="test-group">
+                <button class="test-button" onclick="listAllUsers()">📊 Afficher tous les utilisateurs</button>
+                <button class="test-button" onclick="listAdmins()">👑 Afficher les admins</button>
+                <button class="test-button" onclick="showLocalStorage()">💾 Afficher localStorage brut</button>
+            </div>
+            <div id="usersList" class="output"></div>
+        </div>
+
+        <!-- Session -->
+        <div class="section">
+            <h2>Gestion de session</h2>
+            <div class="test-group">
+                <button class="test-button" onclick="showSessionStorage()">📱 Afficher sessionStorage</button>
+                <button class="test-button" onclick="simulateLogin()">🚪 Simuler connexion</button>
+                <button class="test-button" onclick="simulateLogout()">🚪 Simuler déconnexion</button>
+                <button class="test-button" onclick="checkSessionStatus()">✓ Vérifier session</button>
+            </div>
+            <div id="sessionOutput" class="output"></div>
+        </div>
+
+        <!-- Outils -->
+        <div class="section">
+            <h2>Outils de maintenance</h2>
+            <div class="test-group">
+                <button class="test-button" onclick="exportData()">▼ Exporter les données</button>
+                <button class="test-button" onclick="updateStats()">🔄 Rafraîchir les stats</button>
+                <button class="test-button danger" onclick="clearAllData()">🗑️ Supprimer TOUT</button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="section" style="text-align: center;">
+            <p style="margin-bottom: 15px; color: #999;">Retour au site :</p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <a href="index.html" class="test-button">🏠 Accueil</a>
+                <a href="login.html" class="test-button">🔐 Connexion</a>
+                <a href="register.html" class="test-button">📝 Inscription</a>
+                <a href="setup.html" class="test-button success">⚙️ Setup Admin</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Utilitaires
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const time = new Date().toLocaleTimeString();
+            const prefix = {
+                'info': '[INFO]',
+                'error': '[❌ ERREUR]',
+                'success': '[✅ SUCCÈS]',
+                'warning': '[⚠️ AVERTISSEMENT]'
+            }[type] || '[?]';
+
+            output.innerHTML += `${prefix} ${time} - ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            output.className = `output ${type === 'error' ? 'error' : type === 'warning' ? 'warning' : ''}`;
+        }
+
+        // Tests
+        function testRegisterUser() {
+            const result = registerUser('Utilisateur Test', 'test@shadowwear.com', 'password123', 'user');
+            if (result) {
+                log('✅ Utilisateur enregistré : test@shadowwear.com', 'success');
+            } else {
+                log('❌ Erreur lors de l\'enregistrement', 'error');
+            }
+            updateStats();
+        }
+
+        function testCreateAdmin() {
+            const result = createAdminAccount('Admin Test', 'admin@shadowwear.com', 'admin123');
+            if (result) {
+                log('✅ Admin créé : admin@shadowwear.com', 'success');
+            } else {
+                log('❌ Erreur lors de la création du compte admin', 'error');
+            }
+            updateStats();
+        }
+
+        function testAuthenticateUser() {
+            const user = authenticateUser('test@shadowwear.com', 'password123');
+            if (user) {
+                log(`✅ Authentification réussie : ${user.name}`, 'success');
+            } else {
+                log('❌ Authentification échouée - vérifiez les identifiants', 'error');
+            }
+        }
+
+        function testGetUser() {
+            const user = getUserByEmail('test@shadowwear.com');
+            if (user) {
+                log(`✅ Utilisateur trouvé : ${user.name} (${user.email})`, 'success');
+            } else {
+                log('❌ Utilisateur non trouvé', 'error');
+            }
+        }
+
+        function testChangePassword() {
+            const result = changePassword('test@shadowwear.com', 'newpassword456');
+            if (result) {
+                log('✅ Mot de passe changé avec succès', 'success');
+            } else {
+                log('❌ Erreur lors du changement de mot de passe', 'error');
+            }
+        }
+
+        function testDeleteUser() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer test@shadowwear.com ?')) {
+                const result = deleteUser('test@shadowwear.com');
+                if (result) {
+                    log('✅ Utilisateur supprimé', 'success');
+                    updateStats();
+                } else {
+                    log('❌ Utilisateur non trouvé', 'error');
+                }
+            }
+        }
+
+        function listAllUsers() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const usersList = document.getElementById('usersList');
+
+            if (users.length === 0) {
+                usersList.textContent = 'Aucun utilisateur enregistré';
+                return;
+            }
+
+            let output = `Nombre d'utilisateurs: ${users.length}\n\n`;
+            users.forEach((user, i) => {
+                const date = new Date(user.createdAt).toLocaleDateString('fr-FR');
+                output += `${i + 1}. ${user.name} (${user.email})\n`;
+                output += `   Rôle: ${user.role || 'user'}\n`;
+                output += `   Créé: ${date}\n\n`;
+            });
+
+            usersList.textContent = output;
+            usersList.className = 'output success';
+        }
+
+        function listAdmins() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const admins = users.filter(u => u.role === 'admin');
+            const usersList = document.getElementById('usersList');
+
+            if (admins.length === 0) {
+                usersList.textContent = 'Aucun administrateur';
+                return;
+            }
+
+            let output = `Administrateurs: ${admins.length}\n\n`;
+            admins.forEach((admin, i) => {
+                output += `${i + 1}. ${admin.name} (${admin.email})\n`;
+            });
+
+            usersList.textContent = output;
+            usersList.className = 'output success';
+        }
+
+        function showLocalStorage() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const usersList = document.getElementById('usersList');
+            usersList.textContent = JSON.stringify(users, null, 2);
+            usersList.className = 'output';
+        }
+
+        function showSessionStorage() {
+            const current = sessionStorage.getItem('currentUser') ? JSON.parse(sessionStorage.getItem('currentUser')) : null;
+            const sessionOutput = document.getElementById('sessionOutput');
+
+            if (!current) {
+                sessionOutput.textContent = 'Aucun utilisateur connecté (sessionStorage vide)';
+                sessionOutput.className = 'output warning';
+            } else {
+                sessionOutput.textContent = JSON.stringify(current, null, 2);
+                sessionOutput.className = 'output success';
+            }
+        }
+
+        function simulateLogin() {
+            const user = authenticateUser('test@shadowwear.com', 'password123');
+            if (user) {
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
+                log('✅ Simul connexion : utilisateur stocké en session', 'success');
+                updateStats();
+            } else {
+                log('❌ Utilisateur test@shadowwear.com non trouvé', 'error');
+            }
+        }
+
+        function simulateLogout() {
+            sessionStorage.removeItem('currentUser');
+            log('✅ Simul déconnexion : session vidée', 'success');
+            updateStats();
+        }
+
+        function checkSessionStatus() {
+            const current = sessionStorage.getItem('currentUser');
+            const sessionOutput = document.getElementById('sessionOutput');
+
+            if (!current) {
+                sessionOutput.textContent = '❌ Pas d\'utilisateur connecté';
+                sessionOutput.className = 'output error';
+            } else {
+                const user = JSON.parse(current);
+                sessionOutput.textContent = `✅ Utilisateur connecté: ${user.name} (${user.email})\nRôle: ${user.role || 'user'}`;
+                sessionOutput.className = 'output success';
+            }
+        }
+
+        function exportData() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const dataStr = JSON.stringify(users, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `shadowwear-users-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            log('✅ Données exportées', 'success');
+        }
+
+        function updateStats() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const admins = users.filter(u => u.role === 'admin').length;
+            const standard = users.filter(u => !u.role || u.role === 'user').length;
+            const logged = sessionStorage.getItem('currentUser') ? 'Oui' : 'Non';
+
+            document.getElementById('statUsers').textContent = users.length;
+            document.getElementById('statAdmins').textContent = admins;
+            document.getElementById('statStandard').textContent = standard;
+            document.getElementById('statLogged').textContent = logged;
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ ATTENTION - Cela supprimera TOUS les utilisateurs!\n\nContinuer ?')) {
+                localStorage.removeItem('users');
+                sessionStorage.removeItem('currentUser');
+                log('🗑️ Toutes les données ont été supprimées', 'warning');
+                
+                // Vider les outputs
+                document.getElementById('output').textContent = '';
+                document.getElementById('usersList').textContent = '';
+                document.getElementById('sessionOutput').textContent = '';
+                
+                updateStats();
+            }
+        }
+
+        // Initialisation
+        window.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            log('🎯 Page de test chargée - localStorage activé', 'success');
+        });
+    </script>
+</body>
+</html>

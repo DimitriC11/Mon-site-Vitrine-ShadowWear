@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration | ShadowWear</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/auth.css">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 1) 100%);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .admin-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .admin-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .admin-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .admin-card p {
+            color: #999;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .admin-button {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .users-table th {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .users-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+        }
+
+        .users-table tr:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .delete-btn {
+            padding: 6px 10px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #fecaca;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .admin-section {
+            margin-bottom: 30px;
+        }
+
+        .admin-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .no-access {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 8px;
+        }
+
+        .no-access h3 {
+            color: #fecaca;
+            margin-bottom: 10px;
+        }
+
+        .no-access p {
+            color: #fca5a5;
+        }
+    </style>
+</head>
+<body>
+    <div class="grunge-overlay"></div>
+
+    <div class="auth-container" style="max-width: 1200px;">
+        <!-- En-tête Admin -->
+        <div class="admin-header">
+            <h1 class="auth-title" style="margin: 0;">Panneau d'Administration</h1>
+            <p class="auth-subtitle" style="margin: 0;">Gestion de ShadowWear</p>
+        </div>
+
+        <!-- Contenu Admin -->
+        <div id="adminContent">
+            <!-- Sera rempli par JavaScript -->
+        </div>
+
+        <!-- Bouton Retour -->
+        <div class="auth-footer">
+            <p><a href="index.html" class="auth-link">← Retour au site</a></p>
+        </div>
+    </div>
+
+    <!-- Script d'authentification -->
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script>
+        // ============================================
+        // PAGE D'ADMINISTRATION
+        // ============================================
+
+        // Vérifier si l'utilisateur est connecté ET admin
+        window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            
+            if (!currentUser) {
+                // Rediriger vers la page de connexion
+                alert('Vous devez être connecté pour accéder à cette page');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = JSON.parse(currentUser);
+
+            // Vérifier si l'utilisateur est admin
+            if (user.role !== 'admin') {
+                // Afficher un message d'erreur
+                document.getElementById('adminContent').innerHTML = `
+                    <div class="admin-content">
+                        <div class="no-access">
+                            <h3>Accès refusé</h3>
+                            <p>Vous n'avez pas les permissions pour accéder à l'administration.</p>
+                            <p style="margin-top: 15px;">Email: <strong>${user.email}</strong></p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Afficher le contenu admin
+            displayAdminDashboard(user);
+        });
+
+        /**
+         * Affiche le tableau de bord administrateur
+         */
+        function displayAdminDashboard(adminUser) {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const adminContent = document.getElementById('adminContent');
+
+            let html = `
+                <div class="admin-card" style="grid-column: 1 / -1;">
+                    <h3>Bienvenue, Admin</h3>
+                    <p>Connecté en tant que : <strong>${adminUser.email}</strong></p>
+                    <p>Rôle : <span class="role-badge">Administrateur</span></p>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="admin-card">
+                    <h3>Utilisateurs</h3>
+                    <p style="font-size: 32px; font-weight: 700; color: #10b981; margin: 10px 0;">${users.length}</p>
+                    <p>Nombre total d'utilisateurs enregistrés</p>
+                </div>
+
+                <div class="admin-card">
+                    <h3>Admins</h3>
+                    <p style="font-size: 32px; font-weight: 700; color: #3b82f6; margin: 10px 0;">${users.filter(u => u.role === 'admin').length}</p>
+                    <p>Nombre total d'administrateurs</p>
+                </div>
+
+                <div class="admin-card">
+                    <h3>Utilisateurs standards</h3>
+                    <p style="font-size: 32px; font-weight: 700; color: #f59e0b; margin: 10px 0;">${users.filter(u => !u.role || u.role === 'user').length}</p>
+                    <p>Utilisateurs non administrateurs</p>
+                </div>
+
+                <div class="admin-card">
+                    <h3>Utilisation Statistiques</h3>
+                    <p style="font-size: 32px; font-weight: 700; color: #3b82f6; margin: 10px 0;">📊</p>
+                    <p>Tableau de bord complet</p>
+                    <a href="stats.html" class="admin-button" style="display: block; text-align: center; text-decoration: none; margin-top: 10px;">
+                        Voir les Stats →
+                    </a>
+                </div>
+
+                <div class="admin-card">
+                    <h3>Outils de Développement</h3>
+                    <p style="font-size: 32px; font-weight: 700; color: #f59e0b; margin: 10px 0;">🔧</p>
+                    <p>Tests et données</p>
+                    <a href="tools.html" class="admin-button" style="display: block; text-align: center; text-decoration: none; margin-top: 10px;">
+                        Accéder aux Outils →
+                    </a>
+                </div>
+
+                <!-- Section Gestion des utilisateurs -->
+                <div style="grid-column: 1 / -1;" class="admin-section">
+                    <h2>Gestion des utilisateurs</h2>
+                    ${users.length > 0 ? buildUsersTable(users, adminUser.email) : '<p style="color: #999;">Aucun utilisateur enregistré</p>'}
+                </div>
+
+                <!-- Section Statistiques -->
+                <div style="grid-column: 1 / -1;" class="admin-section">
+                    <h2>📊 Statistiques</h2>
+                    <p style="color: #999; margin-bottom: 15px;">Accédez au tableau de bord complet des commandes avec graphiques, tendances et analyses détaillées.</p>
+                    <a href="stats.html" class="auth-button" style="display: inline-block; text-decoration: none; text-align: center;">
+                        📈 Voir les Statistiques des Commandes
+                    </a>
+                </div>
+
+                <!-- Section Outils -->
+                <div style="grid-column: 1 / -1;" class="admin-section">
+                    <h2>Outils d'administration</h2>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="auth-button" onclick="exportUsersData()">
+                            ▼ Exporter les données
+                        </button>
+                        <button class="auth-button auth-button-danger" onclick="deleteAllUsers()">
+                            🗑️ Supprimer tous les utilisateurs
+                        </button>
+                        <button class="auth-button" onclick="clearStorage()">
+                            🔄 Réinitialiser le stockage
+                        </button>
+                        <button class="auth-button" onclick="logoutAdmin()">
+                            🚪 Déconnexion
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            adminContent.innerHTML = html;
+        }
+
+        /**
+         * Construit le tableau des utilisateurs
+         */
+        function buildUsersTable(users, adminEmail) {
+            let html = '<table class="users-table"><thead><tr>';
+            html += '<th>ID</th>';
+            html += '<th>Email</th>';
+            html += '<th>Nom</th>';
+            html += '<th>Rôle</th>';
+            html += '<th>Enregistré le</th>';
+            html += '<th>Actions</th>';
+            html += '</tr></thead><tbody>';
+
+            users.forEach(user => {
+                const createdDate = new Date(user.createdAt).toLocaleDateString('fr-FR');
+                const roleClass = user.role === 'admin' ? 'role-badge' : '';
+                const roleName = user.role === 'admin' ? 'Administrateur' : 'Utilisateur';
+                const canDelete = user.email !== adminEmail; // Empêcher la suppression de son propre compte
+
+                html += `<tr>
+                    <td>${user.id}</td>
+                    <td><strong>${user.email}</strong></td>
+                    <td>${user.name}</td>
+                    <td><span class="${roleClass}">${roleName}</span></td>
+                    <td>${createdDate}</td>
+                    <td>
+                        ${canDelete ? `<button class="delete-btn" onclick="deleteUser('${user.email}')">Supprimer</button>` : '<span style="color: #999;">(Admin)</span>'}
+                    </td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        /**
+         * Supprime un utilisateur
+         */
+        function deleteUser(email) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${email} ?`)) {
+                if (deleteUser(email)) { // Utilise la fonction du fichier auth.js
+                    alert('Utilisateur supprimé');
+                    // Rafraîchir la page
+                    location.reload();
+                } else {
+                    alert('Erreur lors de la suppression');
+                }
+            }
+        }
+
+        /**
+         * Oups ! Il y a un conflit de nom. Je dois renommer la fonction
+         */
+        function deleteUserAccount(email) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${email} ?`)) {
+                // Récupérer les utilisateurs
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const filteredUsers = users.filter(u => u.email !== email);
+
+                // Vérifier si l'utilisateur a été trouvé
+                if (filteredUsers.length === users.length) {
+                    alert('Utilisateur non trouvé');
+                    return;
+                }
+
+                // Sauvegarder les changements
+                localStorage.setItem('users', JSON.stringify(filteredUsers));
+                alert('Utilisateur supprimé');
+                
+                // Rafraîchir la page
+                location.reload();
+            }
+        }
+
+        /**
+         * Exporte les données des utilisateurs en JSON
+         */
+        function exportUsersData() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const dataStr = JSON.stringify(users, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `shadowwear-users-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * Supprime tous les utilisateurs
+         */
+        function deleteAllUsers() {
+            if (confirm('⚠️ ATTENTION ⚠️\n\nCette action supprimera DÉFINITIVEMENT tous les utilisateurs enregistrés.\n\nÊtes-vous absolument sûr ?')) {
+                if (confirm('Tapez "OUI" pour confirmer la suppression complète')) {
+                    localStorage.removeItem('users');
+                    alert('Tous les utilisateurs ont été supprimés');
+                    location.reload();
+                }
+            }
+        }
+
+        /**
+         * Réinitialise le stockage
+         */
+        function clearStorage() {
+            if (confirm('Cela va réinitialiser le stockage localStorage de votre navigateur.\n\nContinuer ?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('Stockage réinitialisé. Redirection vers la connexion...');
+                window.location.href = 'login.html';
+            }
+        }
+
+        /**
+         * Déconnecte l'administrateur
+         */
+        function logoutAdmin() {
+            sessionStorage.removeItem('currentUser');
+            alert('Vous avez été déconnecté');
+            window.location.href = 'login.html';
+        }
+
+        // Corriger le lien du bouton de suppression
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-btn')) {
+                const email = e.target.getAttribute('onclick').match(/'([^']+)'/)[1];
+                deleteUserAccount(email);
+            }
+        });
+    </script>
+</body>
+</html>

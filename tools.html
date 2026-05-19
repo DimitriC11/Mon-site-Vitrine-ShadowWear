@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outils de Test | Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/auth.css">
+    <style>
+        .tools-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .tools-header {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 1) 100%);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .tool-card h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .tool-card p {
+            color: #999;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #a7f3d0;
+        }
+
+        .status-info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #bfdbfe;
+        }
+
+        .command-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #a7f3d0;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="grunge-overlay"></div>
+
+    <div class="tools-container">
+        <div class="tools-header">
+            <h1 class="auth-title" style="margin: 0;">🔧 Outils de Gestion</h1>
+            <p class="auth-subtitle" style="margin: 5px 0;">Utilitaires et génération de données de test</p>
+        </div>
+
+        <div class="tool-card">
+            <h3>📊 Générer des Commandes de Test</h3>
+            <p>Crée 30 commandes exemples pour tester le système de statistiques. Les données incluent:</p>
+            <ul style="color: #999; font-size: 14px; margin: 10px 0;">
+                <li>✓ 30 commandes réalistes avec statuts variés</li>
+                <li>✓ 5 clients de test avec différents montants</li>
+                <li>✓ 5 produits fictifs</li>
+                <li>✓ Dates distribuées sur les 30 derniers jours</li>
+            </ul>
+            <button class="auth-button" onclick="generateTestOrders()">
+                ▶ Générer les Commandes
+            </button>
+            <div id="generateStatus" class="status-message"></div>
+        </div>
+
+        <div class="two-column">
+            <div class="tool-card">
+                <h3>🗑️ Supprimer les Commandes de Test</h3>
+                <p>Supprime toutes les commandes du système.</p>
+                <button class="auth-button auth-button-danger" onclick="deleteAllOrders()">
+                    🗑️ Supprimer Tout
+                </button>
+                <div id="deleteStatus" class="status-message"></div>
+            </div>
+
+            <div class="tool-card">
+                <h3>📈 Accéder aux Statistiques</h3>
+                <p>Voir le tableau de bord complet avec graphiques et analyses.</p>
+                <a href="stats.html" class="auth-button" style="display: inline-block; text-decoration: none; text-align: center;">
+                    📊 Voir les Stats
+                </a>
+            </div>
+        </div>
+
+        <div class="tool-card">
+            <h3>💾 État du Stockage</h3>
+            <p>Informations sur les données actuelles:</p>
+            <button class="auth-button" onclick="showStorageInfo()">
+                ℹ️ Afficher les Infos
+            </button>
+            <div id="storageInfo" class="status-message"></div>
+        </div>
+
+        <div class="tool-card">
+            <h3>🧪 Console API</h3>
+            <p>Utilisez ces commandes dans la console du navigateur (F12) :</p>
+            <div class="code-block" style="margin-top: 10px;">
+// Créer des commandes de test<br/>
+createTestOrders();<br/>
+<br/>
+// Obtenir les statistiques<br/>
+OrdersManager.getGlobalStats();<br/>
+<br/>
+// Les top clients<br/>
+OrdersManager.getTopClients(5);<br/>
+<br/>
+// Produits les plus vendus<br/>
+OrdersManager.getTopProducts(5);<br/>
+<br/>
+// Toutes les commandes<br/>
+OrdersManager.getAllOrders();<br/>
+            </div>
+        </div>
+
+        <div class="tool-card">
+            <h3>🔐 Authentification Admin Required</h3>
+            <p>Assurez-vous d'être connecté en tant qu'admin pour accéder à ces outils.</p>
+            <button class="auth-button" onclick="location.href='admin.html'">← Retour Admin</button>
+        </div>
+
+        <div class="auth-footer">
+            <p><a href="index.html" class="auth-link">← Retour au site</a></p>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/test-data.js"></script>
+    <script>
+        // Vérifier l'authentification
+        window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            
+            if (!currentUser) {
+                alert('Vous devez être connecté');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = JSON.parse(currentUser);
+            if (user.role !== 'admin') {
+                alert('Accès réservé aux admins');
+                window.location.href = 'login.html';
+                return;
+            }
+        });
+
+        function generateTestOrders() {
+            try {
+                createTestOrders();
+                
+                const statusDiv = document.getElementById('generateStatus');
+                statusDiv.className = 'status-message status-success';
+                statusDiv.innerHTML = `
+                    <strong>✅ Succès!</strong><br/>
+                    30 commandes de test ont été créées.<br/>
+                    <a href="stats.html" style="color: #a7f3d0; text-decoration: underline;">Voir les statistiques →</a>
+                `;
+                statusDiv.style.display = 'block';
+            } catch (e) {
+                const statusDiv = document.getElementById('generateStatus');
+                statusDiv.className = 'status-message status-alert';
+                statusDiv.innerHTML = '<strong>❌ Erreur:</strong> ' + e.message;
+                statusDiv.style.display = 'block';
+            }
+        }
+
+        function deleteAllOrders() {
+            if (confirm('Supprimer TOUTES les commandes ?\n\nCette action est définitive.')) {
+                localStorage.removeItem('orders');
+                
+                const statusDiv = document.getElementById('deleteStatus');
+                statusDiv.className = 'status-message status-success';
+                statusDiv.innerHTML = '<strong>✅ Supprimé!</strong><br/>Toutes les commandes ont été supprimées.';
+                statusDiv.style.display = 'block';
+            }
+        }
+
+        function showStorageInfo() {
+            const orders = OrdersManager.getAllOrders();
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const stats = OrdersManager.getGlobalStats();
+
+            const statusDiv = document.getElementById('storageInfo');
+            statusDiv.className = 'status-message status-info';
+            statusDiv.innerHTML = `
+                <strong>ℹ️ État du Stockage:</strong><br/>
+                📦 Commandes: <strong>${orders.length}</strong><br/>
+                👥 Utilisateurs: <strong>${users.length}</strong><br/>
+                💰 Revenu Total: <strong>€${stats.totalRevenue.toFixed(2).replace('.', ',')}</strong><br/>
+                📊 Panier Moyen: <strong>€${stats.averageOrderValue.toFixed(2).replace('.', ',')}</strong>
+            `;
+            statusDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques des Commandes | Admin ShadowWear</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/auth.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .stats-header {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 1) 100%);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stats-title {
+            margin: 0;
+            color: white;
+        }
+
+        .stats-nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stats-nav button {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-nav button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .stats-nav button.active {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: rgba(16, 185, 129, 0.6);
+            color: #a7f3d0;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 5px;
+        }
+
+        .stat-subtitle {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .stat-trend {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            height: 400px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .orders-table th {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .orders-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+        }
+
+        .orders-table tr:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+        }
+
+        .status-paid {
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+        }
+
+        .status-shipped {
+            background: rgba(59, 130, 246, 0.2);
+            color: #bfdbfe;
+        }
+
+        .status-delivered {
+            background: rgba(139, 92, 246, 0.2);
+            color: #d8b4fe;
+        }
+
+        .status-canceled {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fecaca;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .export-btn {
+            padding: 10px 15px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #a7f3d0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: rgba(16, 185, 129, 0.6);
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #ordersTable {
+            display: none;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="grunge-overlay"></div>
+
+    <div class="page-container">
+        <!-- En-tête Stats -->
+        <div class="stats-header">
+            <div>
+                <h1 class="stats-title">📊 Statistiques des Commandes</h1>
+                <p style="margin: 5px 0; color: #999; font-size: 13px;">Suivi en temps réel de tous les indicateurs clés</p>
+            </div>
+            <div class="stats-nav">
+                <button class="tab-btn active" data-tab="dashboard">Tableau de Bord</button>
+                <button class="tab-btn" data-tab="orders">Commandes</button>
+                <button class="tab-btn" data-tab="clients">Top Clients</button>
+                <button class="tab-btn" data-tab="products">Produits</button>
+                <button class="tab-btn" onclick="location.href='admin.html'">← Admin</button>
+            </div>
+        </div>
+
+        <!-- TABLEAU DE BORD -->
+        <div id="dashboard" class="tab-content">
+            <!-- Statistiques Clés -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-label">Total Commandes</div>
+                    <div class="stat-value" id="totalOrders">0</div>
+                    <div class="stat-subtitle">Toutes les commandes</div>
+                    <div class="stat-trend" id="ordersTrend">-</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Revenu Total</div>
+                    <div class="stat-value" id="totalRevenue" style="color: #10b981;">€0</div>
+                    <div class="stat-subtitle">Montant total généré</div>
+                    <div class="stat-trend" id="revenueTrend">-</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Panier Moyen</div>
+                    <div class="stat-value" id="avgOrder" style="color: #3b82f6;">€0</div>
+                    <div class="stat-subtitle">Montant moyen par commande</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Utilisateurs</div>
+                    <div class="stat-value" id="totalUsers" style="color: #f59e0b;">0</div>
+                    <div class="stat-subtitle">Clients actifs</div>
+                </div>
+            </div>
+
+            <!-- Statuts des Commandes -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-label">En Attente</div>
+                    <div class="stat-value" id="statusPending" style="color: #f59e0b;">0</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Payées</div>
+                    <div class="stat-value" id="statusPaid" style="color: #10b981;">0</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Expédiées</div>
+                    <div class="stat-value" id="statusShipped" style="color: #3b82f6;">0</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Livrées</div>
+                    <div class="stat-value" id="statusDelivered" style="color: #8b5cf6;">0</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Annulées</div>
+                    <div class="stat-value" id="statusCanceled" style="color: #ef4444;">0</div>
+                </div>
+            </div>
+
+            <!-- Graphiques -->
+            <div class="two-column">
+                <div class="chart-container">
+                    <div class="chart-title">Commandes par Statut</div>
+                    <canvas id="statusChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Revenu par Statut</div>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Commandes des 7 derniers jours</div>
+                <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- LISTE DES COMMANDES -->
+        <div id="orders" class="tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 class="section-title">Toutes les Commandes</h2>
+                <button class="export-btn" onclick="exportOrders()">📥 Exporter en CSV</button>
+            </div>
+            <div id="ordersTableContainer">
+                <p class="no-data">Aucune commande trouvée</p>
+            </div>
+        </div>
+
+        <!-- TOP CLIENTS -->
+        <div id="clients" class="tab-content" style="display: none;">
+            <h2 class="section-title">Top 10 Clients</h2>
+            <div class="chart-container">
+                <canvas id="clientsChart"></canvas>
+            </div>
+            <div id="clientsTableContainer" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- PRODUITS POPULAIRES -->
+        <div id="products" class="tab-content" style="display: none;">
+            <h2 class="section-title">Produits les Plus Vendus</h2>
+            <div class="chart-container">
+                <canvas id="productsChart"></canvas>
+            </div>
+            <div id="productsTableContainer" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Bouton Retour -->
+        <div class="auth-footer">
+            <p><a href="index.html" class="auth-link">← Retour au site</a></p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script>
+        // ============================================
+        // PAGE STATISTIQUES COMMANDES
+        // ============================================
+
+        let charts = {};
+
+        // Vérifier authentification
+        window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            
+            if (!currentUser) {
+                alert('Vous devez être connecté');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = JSON.parse(currentUser);
+            if (user.role !== 'admin') {
+                alert('Accès réservé aux admins');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Charger les données
+            initDashboard();
+            setupTabs();
+        });
+
+        /**
+         * Initialise le tableau de bord
+         */
+        function initDashboard() {
+            updateGlobalStats();
+            createCharts();
+            displayOrders();
+            displayTopClients();
+            displayTopProducts();
+        }
+
+        /**
+         * Met à jour les statistiques globales
+         */
+        function updateGlobalStats() {
+            const stats = OrdersManager.getGlobalStats();
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+            document.getElementById('totalOrders').textContent = stats.totalOrders;
+            document.getElementById('totalRevenue').textContent = '€' + stats.totalRevenue.toFixed(2).replace('.', ',');
+            document.getElementById('avgOrder').textContent = '€' + stats.averageOrderValue.toFixed(2).replace('.', ',');
+            document.getElementById('totalUsers').textContent = users.length;
+
+            // Statuts
+            document.getElementById('statusPending').textContent = stats.ordersByStatus.pending;
+            document.getElementById('statusPaid').textContent = stats.ordersByStatus.paid;
+            document.getElementById('statusShipped').textContent = stats.ordersByStatus.shipped;
+            document.getElementById('statusDelivered').textContent = stats.ordersByStatus.delivered;
+            document.getElementById('statusCanceled').textContent = stats.ordersByStatus.canceled;
+        }
+
+        /**
+         * Crée les graphiques
+         */
+        function createCharts() {
+            const statusSummary = OrdersManager.getStatusSummary();
+            
+            // Graphique des statuts
+            createStatusChart(statusSummary);
+            
+            // Graphique des revenus
+            createRevenueChart(statusSummary);
+            
+            // Graphique des tendances
+            createTrendsChart();
+        }
+
+        /**
+         * Graphique des statuts
+         */
+        function createStatusChart(statusSummary) {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            
+            const labels = Object.values(statusSummary).map(s => s.label);
+            const data = Object.values(statusSummary).map(s => s.count);
+            const colors = Object.values(statusSummary).map(s => s.color);
+
+            if (charts.status) charts.status.destroy();
+            
+            charts.status = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: 'rgba(0,0,0,0)',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#999', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Graphique des revenus
+         */
+        function createRevenueChart(statusSummary) {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            
+            const labels = Object.values(statusSummary).map(s => s.label);
+            const data = Object.values(statusSummary).map(s => s.revenue);
+            const colors = Object.values(statusSummary).map(s => s.color);
+
+            if (charts.revenue) charts.revenue.destroy();
+            
+            charts.revenue = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenu (€)',
+                        data: data,
+                        backgroundColor: colors,
+                        borderRadius: 4,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#999' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            ticks: { color: '#999' }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Graphique des tendances
+         */
+        function createTrendsChart() {
+            const ctx = document.getElementById('trendsChart').getContext('2d');
+            const data = OrdersManager.getOrdersByDate(7);
+
+            if (charts.trends) charts.trends.destroy();
+            
+            charts.trends = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => new Date(d.date).toLocaleDateString('fr-FR')),
+                    datasets: [{
+                        label: 'Commandes',
+                        data: data.map(d => d.count),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#10b981'
+                    }, {
+                        label: 'Revenu (€)',
+                        data: data.map(d => d.revenue),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#3b82f6',
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#999', font: { size: 12 } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#999' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            ticks: { color: '#999' },
+                            grid: { display: false }
+                        },
+                        x: {
+                            ticks: { color: '#999' }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Affiche la liste des commandes
+         */
+        function displayOrders() {
+            const orders = OrdersManager.getAllOrders();
+            const container = document.getElementById('ordersTableContainer');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<p class="no-data">Aucune commande trouvée</p>';
+                return;
+            }
+
+            let html = '<table class="orders-table"><thead><tr>';
+            html += '<th>Commande ID</th>';
+            html += '<th>Client</th>';
+            html += '<th>Montant</th>';
+            html += '<th>Statut</th>';
+            html += '<th>Articles</th>';
+            html += '<th>Date</th>';
+            html += '<th>Actions</th>';
+            html += '</tr></thead><tbody>';
+
+            orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(order => {
+                const date = new Date(order.createdAt).toLocaleDateString('fr-FR');
+                const statusClass = `status-${order.status}`;
+                const itemCount = (order.items || []).length;
+
+                html += `<tr>
+                    <td><strong>#${order.id}</strong></td>
+                    <td>${order.email}</td>
+                    <td><strong>€${order.totalAmount.toFixed(2).replace('.', ',')}</strong></td>
+                    <td><span class="status-badge ${statusClass}">${getStatusLabel(order.status)}</span></td>
+                    <td>${itemCount} article(s)</td>
+                    <td>${date}</td>
+                    <td>
+                        <select onchange="updateOrderStatus(${order.id}, this.value)" style="background: rgba(255,255,255,0.05); color: #999; border: 1px solid rgba(255,255,255,0.1); padding: 4px; border-radius: 4px;">
+                            <option value="">Changer...</option>
+                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>En attente</option>
+                            <option value="paid" ${order.status === 'paid' ? 'selected' : ''}>Payée</option>
+                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Expédiée</option>
+                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Livrée</option>
+                            <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>Annulée</option>
+                        </select>
+                    </td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        /**
+         * Affiche les top clients
+         */
+        function displayTopClients() {
+            const clients = OrdersManager.getTopClients(10);
+            const container = document.getElementById('clientsTableContainer');
+
+            if (clients.length === 0) {
+                container.innerHTML = '<p class="no-data">Pas encore de clients</p>';
+                return;
+            }
+
+            // Créer le graphique
+            const ctx = document.getElementById('clientsChart').getContext('2d');
+            const labels = clients.map(c => c.email);
+            const data = clients.map(c => c.totalSpent);
+
+            if (charts.clients) charts.clients.destroy();
+            charts.clients = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Dépensé (€)',
+                        data: data,
+                        backgroundColor: '#10b981',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            ticks: { color: '#999' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            ticks: { color: '#999' }
+                        }
+                    }
+                }
+            });
+
+            // Tableau
+            let html = '<table class="orders-table"><thead><tr>';
+            html += '<th>Classement</th>';
+            html += '<th>Email</th>';
+            html += '<th>Commandes</th>';
+            html += '<th>Total Dépensé</th>';
+            html += '</tr></thead><tbody>';
+
+            clients.forEach((client, index) => {
+                html += `<tr>
+                    <td><strong>#${index + 1}</strong></td>
+                    <td>${client.email}</td>
+                    <td>${client.orderCount}</td>
+                    <td><strong>€${client.totalSpent.toFixed(2).replace('.', ',')}</strong></td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        /**
+         * Affiche les produits populaires
+         */
+        function displayTopProducts() {
+            const products = OrdersManager.getTopProducts(10);
+            const container = document.getElementById('productsTableContainer');
+
+            if (products.length === 0) {
+                container.innerHTML = '<p class="no-data">Pas encore de ventes de produits</p>';
+                return;
+            }
+
+            // Créer le graphique
+            const ctx = document.getElementById('productsChart').getContext('2d');
+            const labels = products.map(p => p.productName);
+            const data = products.map(p => p.totalSold);
+
+            if (charts.products) charts.products.destroy();
+            charts.products = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantité Vendue',
+                        data: data,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            ticks: { color: '#999' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            ticks: { color: '#999' }
+                        }
+                    }
+                }
+            });
+
+            // Tableau
+            let html = '<table class="orders-table"><thead><tr>';
+            html += '<th>Classement</th>';
+            html += '<th>Produit</th>';
+            html += '<th>Quantité Vendue</th>';
+            html += '<th>Revenu Total</th>';
+            html += '</tr></thead><tbody>';
+
+            products.forEach((product, index) => {
+                html += `<tr>
+                    <td><strong>#${index + 1}</strong></td>
+                    <td>${product.productName}</td>
+                    <td><strong>${product.totalSold} unité(s)</strong></td>
+                    <td>€${product.totalRevenue.toFixed(2).replace('.', ',')}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        /**
+         * Gestion des onglets
+         */
+        function setupTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    if (!tabName) return;
+
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+
+                    document.getElementById(tabName).style.display = 'block';
+                });
+            });
+        }
+
+        /**
+         * Utilitaires
+         */
+        function getStatusLabel(status) {
+            const labels = {
+                pending: 'En attente',
+                paid: 'Payée',
+                shipped: 'Expédiée',
+                delivered: 'Livrée',
+                canceled: 'Annulée'
+            };
+            return labels[status] || status;
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            if (newStatus) {
+                OrdersManager.updateOrderStatus(orderId, newStatus);
+                displayOrders();
+                updateGlobalStats();
+                createCharts();
+            }
+        }
+
+        function exportOrders() {
+            const orders = OrdersManager.getAllOrders();
+            let csv = 'ID,Email,Montant,Statut,Date\n';
+
+            orders.forEach(order => {
+                const date = new Date(order.createdAt).toLocaleDateString('fr-FR');
+                csv += `#${order.id},"${order.email}",${order.totalAmount.toFixed(2)},${getStatusLabel(order.status)},${date}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `commandes-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
