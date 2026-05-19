@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | ShadowWear</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/auth.css">
+</head>
+<body>
+    <!-- Overlay texture (optionnel) -->
+    <div class="grunge-overlay"></div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- En-tête -->
+            <div class="auth-header">
+                <h1 class="auth-title">Connexion</h1>
+                <p class="auth-subtitle">Accédez à votre compte ShadowWear</p>
+            </div>
+
+            <!-- Formulaire de connexion -->
+            <form id="loginForm" class="auth-form">
+                <!-- Champ Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="test@example.com"
+                        required
+                    >
+                    <span class="error-message" id="emailError"></span>
+                </div>
+
+                <!-- Champ Mot de passe -->
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="••••••••"
+                        required
+                    >
+                    <span class="error-message" id="passwordError"></span>
+                </div>
+
+                <!-- Message d'erreur général -->
+                <div id="generalError" class="alert alert-error"></div>
+
+                <!-- Bouton de connexion -->
+                <button type="submit" class="auth-button">Se connecter</button>
+            </form>
+
+            <!-- Lien vers l'inscription -->
+            <div class="auth-footer">
+                <p>Pas de compte ? 
+                    <a href="register.html" class="auth-link">Inscrivez-vous ici</a>
+                </p>
+                <p style="margin-top: 10px; font-size: 0.85em; color: #999;">
+                    🔧 Première utilisation ? 
+                    <a href="init-users.html" class="auth-link">Initialisez les comptes</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script d'authentification -->
+    <script src="js/auth.js"></script>
+    <script>
+        // Vérifier au chargement si des utilisateurs existent
+        window.addEventListener('load', function() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            if (users.length === 0) {
+                const generalError = document.getElementById('generalError');
+                generalError.innerHTML = 
+                    '⚠️ Aucun compte utilisateur trouvé. <a href="init-users.html" style="color: #4CAF50; text-decoration: underline;">Cliquez ici pour initialiser les comptes</a>';
+                generalError.style.display = 'block';
+                generalError.style.background = 'rgba(255, 152, 0, 0.1)';
+                generalError.style.borderLeft = '4px solid #ff9800';
+            }
+        });
+
+        // Gestion du formulaire de connexion
+        const loginForm = document.getElementById('loginForm');
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêche l'envoi du formulaire
+
+            // Récupérer les valeurs du formulaire
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Réinitialiser les messages d'erreur
+            resetErrorMessages();
+
+            // Vérifier s'il y a des utilisateurs dans le système
+            const allUsers = JSON.parse(localStorage.getItem('users')) || [];
+            if (allUsers.length === 0) {
+                const generalError = document.getElementById('generalError');
+                generalError.innerHTML = 
+                    '⚠️ Aucun compte utilisateur trouvé. <a href="init-users.html" style="color: #4CAF50; text-decoration: underline;">Cliquez ici pour initialiser les comptes</a>';
+                generalError.style.display = 'block';
+                generalError.style.background = 'rgba(255, 152, 0, 0.1)';
+                generalError.style.borderLeft = '4px solid #ff9800';
+                return;
+            }
+
+            // Vérifier si l'email et le mot de passe ne sont pas vides
+            if (!email || !password) {
+                document.getElementById('generalError').textContent = 
+                    'Veuillez remplir tous les champs';
+                document.getElementById('generalError').style.display = 'block';
+                return;
+            }
+
+            // Vérifier les identifiants
+            const user = authenticateUser(email, password);
+
+            if (user) {
+                // Sauvegarder l'utilisateur connecté dans sessionStorage
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
+
+                // Afficher un message de succès et rediriger
+                alert('Connexion réussie !');
+                window.location.href = 'account.html';
+            } else {
+                // Afficher un message d'erreur
+                const generalError = document.getElementById('generalError');
+                generalError.innerHTML = 
+                    '❌ Email ou mot de passe incorrect.<br><small>Comptes par défaut: admin@shadowwear.com / admin123 ou user@shadowwear.com / user123</small>';
+                generalError.style.display = 'block';
+            }
+        });
+
+        // Fonction pour réinitialiser les messages d'erreur
+        function resetErrorMessages() {
+            document.getElementById('emailError').textContent = '';
+            document.getElementById('passwordError').textContent = '';
+            document.getElementById('generalError').textContent = '';
+            document.getElementById('generalError').style.display = 'none';
+            document.getElementById('generalError').style.background = '';
+            document.getElementById('generalError').style.borderLeft = '';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration | ShadowWear</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .setup-container {
+            max-width: 500px;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.9) 0%, rgba(5, 5, 5, 0.95) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .subtitle {
+            color: #999;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e5e5e5;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(100, 100, 100, 0.2) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .button:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(100, 100, 100, 0.3) 100%);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .button-secondary {
+            background: rgba(100, 100, 100, 0.15);
+            border-color: rgba(150, 150, 150, 0.3);
+            margin-top: 10px;
+        }
+
+        .button-secondary:hover {
+            background: rgba(100, 100, 100, 0.25);
+        }
+
+        .message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #a7f3d0;
+            border-left: 4px solid #10b981;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fecaca;
+            border-left: 4px solid #ef4444;
+        }
+
+        .admin-list {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-list h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .admin-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-item small {
+            color: #999;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .edit-btn {
+            padding: 4px 10px;
+            background: rgba(100, 150, 255, 0.2);
+            color: #93c5fd;
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .edit-btn:hover {
+            background: rgba(100, 150, 255, 0.3);
+        }
+
+        .tips {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .tips h3 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .tips p {
+            color: #999;
+        }
+
+        .tip-code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            margin: 8px 0;
+            color: #10b981;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <h1>Configuration ShadowWear</h1>
+        <p class="subtitle">Créez un compte administrateur</p>
+
+        <div class="info-box">
+            ℹ️ Cette page permet de créer un compte administrateur pour accéder au panneau d'administration.
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <form id="setupForm">
+            <div class="form-group">
+                <label for="adminName">Nom de l'administrateur</label>
+                <input 
+                    type="text" 
+                    id="adminName" 
+                    placeholder="Votre nom complet"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="adminEmail">Email</label>
+                <input 
+                    type="email" 
+                    id="adminEmail" 
+                    placeholder="admin@shadowwear.com"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="adminPassword">Mot de passe</label>
+                <input 
+                    type="password" 
+                    id="adminPassword" 
+                    placeholder="••••••••"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="button">Créer le compte admin</button>
+        </form>
+
+        <!-- Comptes admin existants -->
+        <div id="adminListSection" class="admin-list" style="display: none;">
+            <h2>Comptes administrateur existants</h2>
+            <div id="adminList"></div>
+        </div>
+
+        <a href="index.html" class="button button-secondary" style="display: block; text-align: center; text-decoration: none;">
+            ← Retour au site
+        </a>
+
+        <div class="tips">
+            <h3>💡 Conseils d'utilisation</h3>
+            <p>Une fois le compte admin créé :</p>
+            <p>1. Allez sur <strong>login.html</strong> et connectez-vous</p>
+            <p>2. Accédez au panneau d'administration via le lien <strong>Admin</strong> dans la navigation</p>
+            <p>3. Vous pouvez gérer les utilisateurs et les roles</p>
+            <p style="margin-top: 10px; color: #ef4444; font-weight: 600;">⚠️ Ne partagez pas vos identifiants admin !</p>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Afficher les comptes admin existants
+        function displayExistingAdmins() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const admins = users.filter(u => u.role === 'admin');
+
+            if (admins.length > 0) {
+                const adminListSection = document.getElementById('adminListSection');
+                const adminList = document.getElementById('adminList');
+
+                let html = '';
+                admins.forEach(admin => {
+                    const createdDate = new Date(admin.createdAt).toLocaleDateString('fr-FR');
+                    html += `
+                        <div class="admin-item">
+                            <div>
+                                <strong>${admin.name}</strong>
+                                <small>${admin.email} (créé le ${createdDate})</small>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                adminList.innerHTML = html;
+                adminListSection.style.display = 'block';
+            }
+        }
+
+        // Créer un compte admin
+        document.getElementById('setupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('adminName').value.trim();
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+
+            const messageEl = document.getElementById('message');
+
+            // Validation basique
+            if (!name || name.length < 3) {
+                showMessage('Le nom doit contenir au moins 3 caractères', 'error');
+                return;
+            }
+
+            if (!email || !isValidEmail(email)) {
+                showMessage('Veuillez entrer un email valide', 'error');
+                return;
+            }
+
+            if (!password || password.length < 6) {
+                showMessage('Le mot de passe doit contenir au moins 6 caractères', 'error');
+                return;
+            }
+
+            // Vérifier si l'email existe déjà
+            if (userExists(email)) {
+                showMessage('Cet email est déjà utilisé', 'error');
+                return;
+            }
+
+            // Créer le compte admin
+            if (createAdminAccount(name, email, password)) {
+                showMessage(`✅ Compte administrateur créé ! Email: ${email}`, 'success');
+                
+                // Réinitialiser le formulaire
+                document.getElementById('setupForm').reset();
+
+                // Afficher la liste des admins
+                setTimeout(() => {
+                    displayExistingAdmins();
+                }, 500);
+            } else {
+                showMessage('Erreur lors de la création du compte', 'error');
+            }
+        });
+
+        // Afficher un message
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+        }
+
+        // Au chargement de la page
+        window.addEventListener('DOMContentLoaded', function() {
+            displayExistingAdmins();
+        });
+    </script>
+</body>
+</html>

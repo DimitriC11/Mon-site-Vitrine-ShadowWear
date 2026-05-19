@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Démarrage Rapide - ShadowWear</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        .warning-box p {
+            color: #856404;
+            line-height: 1.6;
+        }
+        .success-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success-box h3 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        .steps {
+            margin: 30px 0;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .step h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .step p {
+            color: #555;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+        .credentials {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .credentials strong {
+            color: #3498db;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px 5px;
+            font-size: 1.1em;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .links {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+        .note {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .note p {
+            color: #0d47a1;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Démarrage Rapide</h1>
+        <p class="subtitle">Guide d'initialisation du système d'authentification ShadowWear</p>
+
+        <div class="warning-box">
+            <h3>⚠️ Problème de connexion ?</h3>
+            <p><strong>Vous ne pouvez pas vous connecter car aucun compte utilisateur n'existe encore dans votre navigateur.</strong></p>
+            <p>Le système utilise le <strong>localStorage</strong> de votre navigateur pour stocker les utilisateurs. Vous devez d'abord créer les comptes.</p>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <h3>📝 Étape 1 : Créer les comptes par défaut</h3>
+                <p>Cliquez sur le bouton ci-dessous pour accéder à la page d'initialisation :</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="init-users.html" class="btn">🔧 Initialiser les comptes</a>
+                </div>
+                <p>Une fois sur la page, cliquez sur <strong>"🚀 Créer les comptes par défaut"</strong></p>
+            </div>
+
+            <div class="step">
+                <h3>✅ Étape 2 : Vérifier les comptes créés</h3>
+                <p>Deux comptes seront automatiquement créés :</p>
+                
+                <div class="credentials">
+                    <strong>👑 Compte Administrateur</strong><br>
+                    📧 Email: admin@shadowwear.com<br>
+                    🔑 Mot de passe: admin123
+                </div>
+
+                <div class="credentials">
+                    <strong>👤 Compte Utilisateur</strong><br>
+                    📧 Email: user@shadowwear.com<br>
+                    🔑 Mot de passe: user123
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>🔐 Étape 3 : Se connecter</h3>
+                <p>Maintenant vous pouvez vous connecter avec l'un de ces comptes :</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="login.html" class="btn btn-success">🔑 Page de connexion</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="success-box">
+            <h3>✨ Après la connexion</h3>
+            <p><strong>Utilisateur normal</strong> : Vous serez redirigé vers <code>account.html</code> (gestion de compte)</p>
+            <p><strong>Administrateur</strong> : Vous pouvez accéder à <code>admin.html</code> (panneau d'administration)</p>
+        </div>
+
+        <div class="note">
+            <h4 style="margin-bottom: 10px;">💡 Notes importantes :</h4>
+            <p>• Les comptes sont stockés localement dans votre navigateur</p>
+            <p>• Chaque navigateur a son propre stockage (Chrome ≠ Firefox)</p>
+            <p>• Les données persistent même après fermeture du navigateur</p>
+            <p>• Vous pouvez créer de nouveaux comptes via la page d'inscription</p>
+        </div>
+
+        <div class="links">
+            <h3 style="margin-bottom: 20px; color: #333;">🔗 Liens rapides</h3>
+            <a href="index.html" class="btn btn-secondary">🏠 Site principal</a>
+            <a href="init-users.html" class="btn">🔧 Initialisation</a>
+            <a href="register.html" class="btn">📝 Inscription</a>
+        </div>
+    </div>
+</body>
+</html>

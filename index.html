@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowWear | L'art de rester dans l'ombre</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <!-- Script pour la visualisation 3D -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <!-- Leaflet CSS pour la carte -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --accent: #ffffff;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .gothic-font {
+            font-family: 'UnifrakturMaguntia', cursive;
+        }
+        .text-shadow-glow {
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        .grunge-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+            pointer-events: none;
+            opacity: 0.15;
+            z-index: 50;
+        }
+        .vignette {
+            box-shadow: inset 0 0 150px rgba(0,0,0,1);
+        }
+        .product-card:hover img {
+            transform: scale(1.05);
+            filter: grayscale(0);
+        }
+        .product-card img, .product-card model-viewer {
+            transition: all 0.5s ease;
+            filter: grayscale(1);
+        }
+        model-viewer {
+            width: 100%;
+            height: 500px;
+            background-color: #0a0a0a;
+            --poster-color: transparent;
+        }
+        .logo-container {
+            border: 2px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(20,20,20,0.8) 0%, rgba(5,5,5,0.9) 100%);
+        }
+        /* Cart Styles */
+        .cart-panel {
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cart-panel.open {
+            transform: translateX(0);
+        }
+        .cart-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .cart-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .cart-badge {
+            animation: pulse-badge 0.3s ease;
+        }
+        @keyframes pulse-badge {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .cart-item-enter {
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* PDF Modal Styles */
+        .pdf-modal {
+            display: flex;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .pdf-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .pdf-modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .pdf-modal.open .pdf-modal-content {
+            transform: scale(1);
+        }
+        
+        /* Organigramme clickable items */
+        .org-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .org-item:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        /* Checkout Modal Styles */
+        #checkoutOverlay {
+            animation: fadeIn 0.3s ease;
+        }
+        #checkoutOverlay.hidden {
+            animation: fadeOut 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        #checkoutOverlay input:focus {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+        #checkoutOverlay input::placeholder {
+            color: rgba(107, 114, 128, 0.8);
+        }
+
+        /* Timeline Effects */
+        .timeline-item {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Timeline Year Badge Glow */
+        .timeline-year {
+            position: relative;
+            transition: all 0.4s ease;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)) !important;
+        }
+        .timeline-year::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            background: radial-gradient(circle, rgba(255,255,255,0.3), rgba(255,255,255,0) 70%);
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .timeline-item.visible .timeline-year {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2), inset 0 0 8px rgba(255,255,255,0.1);
+        }
+        .timeline-item.visible .timeline-year::before {
+            opacity: 1;
+        }
+        
+        /* Timeline Circle Animation */
+        .timeline-circle {
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            background: linear-gradient(135deg, rgba(255,255,255,1), rgba(230,230,230,1));
+        }
+        .timeline-circle::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            background: radial-gradient(circle, rgba(255,255,255,0.4), transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+        }
+        .timeline-item.visible .timeline-circle {
+            transform: scale(1.4);
+            box-shadow: 0 0 25px rgba(255,255,255,0.7), inset 0 0 12px rgba(255,255,255,0.4), 0 0 40px rgba(255,255,255,0.3);
+        }
+        .timeline-item.visible .timeline-circle::after {
+            opacity: 1;
+            animation: pulse-ring 1.5s ease-out infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+        
+        /* Timeline Content Animation */
+        .timeline-content {
+            transition: all 0.4s ease;
+        }
+        .timeline-item.visible .timeline-content {
+            animation: contentSlide 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes contentSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Timeline Item Hover */
+        .timeline-item:hover .timeline-content {
+            transform: translateX(8px);
+        }
+        .timeline-item:hover .timeline-circle {
+            filter: brightness(1.2);
+        }
+        
+        /* Vertical Line Animation */
+        .timeline-line {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.05) 100%);
+            transition: all 0.8s ease;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+        
+        /* Timeline Section Header */
+        #timeline h3 {
+            animation: slideInDown 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Glow Effect on Timeline Section */
+        #timeline {
+            position: relative;
+        }
+        #timeline::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Map Styles */
+        #map {
+            height: 600px;
+            width: 100%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            filter: grayscale(0.3) brightness(0.8);
+        }
+        
+        .leaflet-popup-content-wrapper {
+            background: rgba(10, 10, 10, 0.98);
+            color: #e5e5e5;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 6px;
+        }
+        
+        .leaflet-popup-content {
+            margin: 0;
+            width: auto;
+        }
+        
+        .leaflet-popup-content img {
+            transition: filter 0.3s ease;
+        }
+        
+        .leaflet-popup-content img:hover {
+            filter: grayscale(0) !important;
+        }
+        
+        .leaflet-popup-tip {
+            background: rgba(10, 10, 10, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .leaflet-container a.leaflet-popup-close-button {
+            color: #fff;
+            font-size: 24px;
+        }
+        
+        .leaflet-container a.leaflet-popup-close-button:hover {
+            color: #999;
+        }
+    </style>
+</head>
+<body class="relative">
+    <div class="grunge-overlay"></div>
+
+    <!-- PDF Modal -->
+    <div id="pdfModal" class="pdf-modal fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+        <div class="pdf-modal-content bg-[#0a0a0a] border border-white/20 rounded-sm w-full max-w-6xl max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-white/10">
+                <div>
+                    <h3 id="pdfModalTitle" class="text-xl font-bold uppercase tracking-wider text-white">Fiche de Poste</h3>
+                    <p id="pdfModalSubtitle" class="text-gray-500 text-sm mt-1">ShadowWear</p>
+                </div>
+                <button onclick="closePdfModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- PDF Viewer -->
+            <div class="flex-1 overflow-hidden p-6">
+                <iframe id="pdfViewer" class="w-full h-full border border-white/10" frameborder="0" style="min-height: 70vh;"></iframe>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-white/10 flex justify-between items-center">
+                <button onclick="closePdfModal()" class="px-6 py-3 border border-white/20 text-white uppercase text-xs tracking-widest font-bold hover:bg-white/10 transition-all">
+                    Fermer
+                </button>
+                <a id="pdfDownloadLink" href="/" download class="px-6 py-3 bg-white text-black uppercase text-xs tracking-widest font-bold hover:bg-gray-200 transition-all">
+                    Télécharger le PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="cartOverlay" class="cart-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-[60]" onclick="closeCart()"></div>
+
+    <!-- Cart Panel -->
+    <div id="cartPanel" class="cart-panel fixed top-0 right-0 h-full w-full max-w-md bg-[#0a0a0a] border-l border-white/10 z-[70] flex flex-col">
+        <!-- Cart Header -->
+        <div class="flex items-center justify-between p-6 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <h2 class="text-xl font-bold uppercase tracking-wider text-white">Panier</h2>
+                <span id="cartCountHeader" class="text-gray-500 text-sm">(0)</span>
+            </div>
+            <button onclick="closeCart()" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Cart Items -->
+        <div id="cartItems" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <!-- Empty State -->
+            <div id="emptyCart" class="flex flex-col items-center justify-center h-full text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-700 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <p class="text-gray-500 uppercase tracking-widest text-xs mb-2" data-i18n="panier-vide">Votre panier est vide</p>
+                <p class="text-gray-600 text-sm">Explorez notre collection pour ajouter des articles</p>
+            </div>
+        </div>
+
+        <!-- Cart Footer -->
+        <div id="cartFooter" class="border-t border-white/10 p-6 space-y-4 hidden">
+            <!-- Promo Code Section -->
+            <div class="space-y-2">
+                <label class="text-gray-400 uppercase tracking-widest text-xs block">Code Promotionnel</label>
+                <div class="flex gap-2">
+                    <input 
+                        type="text" 
+                        id="promoInput" 
+                        placeholder="Entrez votre code" 
+                        class="flex-1 bg-white/10 border border-white/20 text-white text-xs px-3 py-2 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600"
+                    >
+                    <button onclick="applyPromo()" class="px-3 py-2 bg-white/20 text-white text-xs font-bold uppercase hover:bg-white/30 transition-colors border border-white/20">
+                        Appliquer
+                    </button>
+                </div>
+                <p id="promoMessage" class="text-xs text-gray-600 h-4"></p>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <span class="text-gray-400 uppercase tracking-widest text-xs" data-i18n="panier-subtotal">Sous-total</span>
+                <span id="cartSubtotal" class="text-white font-mono text-lg">0.00€</span>
+            </div>
+            <div id="discountSection" class="flex justify-between items-center text-sm hidden">
+                <span class="text-green-400">Réduction</span>
+                <span id="discountAmount" class="text-green-400 font-mono">-0.00€</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+                <span class="text-gray-500">Livraison</span>
+                <span class="text-gray-400">Calculée à la prochaine étape</span>
+            </div>
+            <div class="flex justify-between items-center pt-4 border-t border-white/10">
+                <span class="text-white font-bold uppercase tracking-wider">Total</span>
+                <span id="cartTotal" class="text-white font-mono text-2xl font-bold">0.00€</span>
+            </div>
+            <button onclick="goToCheckout()" class="w-full py-4 bg-white text-black font-bold uppercase text-xs tracking-[0.2em] hover:bg-gray-200 transition-all mt-4" data-i18n="panier-commander">
+                Passer la commande
+            </button>
+            <button onclick="closeCart()" class="w-full py-3 border border-white/20 text-white font-bold uppercase text-xs tracking-[0.2em] hover:bg-white/10 transition-all">
+                Continuer les achats
+            </button>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[75] hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-[#0a0a0a] border border-white/10 rounded-lg max-w-2xl w-full my-auto shadow-2xl">
+            <!-- Checkout Header -->
+            <div class="flex items-center justify-between p-6 border-b border-white/10">
+                <h2 class="text-2xl font-bold uppercase tracking-wider text-white" data-i18n="paiement-titre">Paiement</h2>
+                <button onclick="closeCheckout()" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Checkout Content -->
+            <div class="p-6 max-h-[80vh] overflow-y-auto">
+                <form id="checkoutForm" onsubmit="submitPayment(event)" class="space-y-6">
+                    <!-- Order Summary -->
+                    <div class="bg-white/5 border border-white/10 p-4 rounded-lg">
+                        <h3 class="text-white font-bold uppercase text-sm mb-3 tracking-wider" data-i18n="paiement-resume">Résumé de la commande</h3>
+                        <div id="checkoutSummary" class="space-y-2 text-sm text-gray-400 mb-4">
+                            <!-- Items populated by JS -->
+                        </div>
+                        <div class="border-t border-white/10 pt-3">
+                            <div class="flex justify-between text-white font-bold">
+                                <span>Total:</span>
+                                <span id="checkoutTotal">0.00€</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div class="space-y-4">
+                        <h3 class="text-white font-bold uppercase text-sm tracking-wider" data-i18n="paiement-perso">Informations personnelles</h3>
+                        <input 
+                            type="text" 
+                            placeholder="Nom complet" 
+                            required 
+                            class="w-full bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded"
+                        >
+                        <input 
+                            type="email" 
+                            placeholder="Adresse email" 
+                            required 
+                            class="w-full bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded"
+                        >
+                        <input 
+                            type="tel" 
+                            placeholder="Numéro de téléphone" 
+                            required 
+                            class="w-full bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded"
+                        >
+                    </div>
+
+                    <!-- Shipping Address -->
+                    <div class="space-y-4">
+                        <h3 class="text-white font-bold uppercase text-sm tracking-wider" data-i18n="paiement-livraison">Adresse de livraison</h3>
+                        <input 
+                            type="text" 
+                            placeholder="Adresse" 
+                            required 
+                            class="w-full bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded"
+                        >
+                        <div class="grid grid-cols-2 gap-4">
+                            <input 
+                                type="text" 
+                                placeholder="Code postal" 
+                                required 
+                                class="bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded"
+                            >
+                            <input 
+                                type="text" 
+                                placeholder="Ville" 
+                                required 
+                                class="bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded"
+                            >
+                        </div>
+                        <input 
+                            type="text" 
+                            placeholder="Pays" 
+                            required 
+                            class="w-full bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded"
+                        >
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-white font-bold uppercase text-sm tracking-wider" data-i18n="paiement-info">Informations de paiement</h3>
+                            <div class="flex gap-2">
+                                <div class="w-8 h-5 bg-blue-600 rounded text-white text-[8px] font-bold flex items-center justify-center">VISA</div>
+                                <div class="w-8 h-5 bg-red-600 rounded text-white text-[8px] font-bold flex items-center justify-center">MC</div>
+                                <div class="w-8 h-5 bg-yellow-500 rounded text-white text-[8px] font-bold flex items-center justify-center">AMEX</div>
+                                <div class="w-8 h-5 bg-blue-500 rounded text-white text-[8px] font-bold flex items-center justify-center">PP</div>
+                            </div>
+                        </div>
+                        <input 
+                            type="text" 
+                            placeholder="Nom du titulaire" 
+                            required 
+                            class="w-full bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded"
+                        >
+                        <input 
+                            type="text" 
+                            placeholder="Numéro de carte (16 chiffres)" 
+                            maxlength="19"
+                            id="cardNumber"
+                            required 
+                            class="w-full bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded font-mono tracking-wider"
+                        >
+                        <div class="grid grid-cols-3 gap-4">
+                            <input 
+                                type="text" 
+                                placeholder="MM/AA" 
+                                maxlength="5"
+                                required 
+                                class="bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded font-mono"
+                            >
+                            <input 
+                                type="text" 
+                                placeholder="CVV" 
+                                maxlength="3"
+                                required 
+                                class="bg-white/10 border border-white/20 text-white text-sm px-4 py-3 focus:outline-none focus:border-white/50 transition-colors placeholder-gray-600 rounded font-mono"
+                            >
+                            <div class="bg-white/5 border border-white/10 rounded p-3 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <line x1="1" y1="10" x2="23" y2="10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox -->
+                    <label class="flex items-start gap-3 text-gray-400 text-sm cursor-pointer">
+                        <input type="checkbox" required class="mt-1 w-4 h-4 accent-white">
+                        <span>J'accepte les conditions d'utilisation et la politique de confidentialité</span>
+                    </label>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-4 pt-4 border-t border-white/10">
+                        <button type="button" onclick="closeCheckout()" class="flex-1 py-3 border border-white/20 text-white font-bold uppercase text-xs tracking-wider hover:bg-white/10 transition-all rounded">
+                            Annuler
+                        </button>
+                        <button type="submit" class="flex-1 py-3 bg-white text-black font-bold uppercase text-xs tracking-wider hover:bg-gray-200 transition-all rounded">
+                            Payer maintenant
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-40 bg-black/80 backdrop-blur-md border-b border-white/10 px-6 py-4 flex justify-between items-center">
+        <div class="text-2xl gothic-font tracking-tighter text-white">S<span class="text-gray-500">W</span></div>
+        <div class="space-x-8 hidden md:flex uppercase text-xs tracking-[0.3em] font-bold">
+            <a href="#home" class="hover:text-white transition-colors" data-i18n="nav-accueil">Accueil</a>
+            <a href="#about" class="hover:text-white transition-colors" data-i18n="nav-histoire">Histoire</a>
+            <a href="#collection" class="hover:text-white transition-colors" data-i18n="nav-collection">Collection</a>
+            <a href="#avis" class="hover:text-white transition-colors" data-i18n="nav-avis">Avis</a>
+            <a href="#sponsor" class="hover:text-white transition-colors" data-i18n="nav-sponsor">Sponsor</a>
+            <a href="#magasins" class="hover:text-white transition-colors" data-i18n="nav-magasins">Magasins</a>
+            <a href="#organigramme" class="hover:text-white transition-colors" data-i18n="nav-organigramme">Organigramme</a>
+            <a href="#contact" class="hover:text-white transition-colors" data-i18n="nav-contact">Contact</a>
+            <a href="login.html" class="hover:text-white transition-colors">Compte</a>
+            <a href="admin.html" class="hover:text-white transition-colors">Admin</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Language Switcher -->
+            <div class="relative group">
+                <button id="langBtn" onclick="toggleLanguage()" class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white uppercase text-xs font-bold tracking-wider border border-white/20 group-hover:border-white/50">
+                    <span id="langText">EN</span>
+                </button>
+                <div class="absolute right-0 mt-1 w-24 bg-black/98 border border-white/20 rounded shadow-lg hidden group-hover:block z-50 max-h-64 overflow-y-auto">
+                    <button onclick="setLanguage('fr')" class="w-full px-4 py-2 text-left text-xs uppercase text-gray-400 hover:text-white hover:bg-white/10 transition-colors">Français</button>
+                    <button onclick="setLanguage('en')" class="w-full px-4 py-2 text-left text-xs uppercase text-gray-400 hover:text-white hover:bg-white/10 transition-colors border-t border-white/10">English</button>
+                    <button onclick="setLanguage('ro')" class="w-full px-4 py-2 text-left text-xs uppercase text-gray-400 hover:text-white hover:bg-white/10 transition-colors border-t border-white/10">Română</button>
+                    <button onclick="setLanguage('es')" class="w-full px-4 py-2 text-left text-xs uppercase text-gray-400 hover:text-white hover:bg-white/10 transition-colors border-t border-white/10">Español</button>
+                    <button onclick="setLanguage('el')" class="w-full px-4 py-2 text-left text-xs uppercase text-gray-400 hover:text-white hover:bg-white/10 transition-colors border-t border-white/10">Ελληνικά</button>
+                </div>
+            </div>
+            <!-- Cart Button -->
+            <button onclick="openCart()" class="relative p-2 hover:bg-white/10 rounded-full transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span id="cartBadge" class="cart-badge absolute -top-1 -right-1 bg-white text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex flex-col items-center justify-center pt-20 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black z-0"></div>
+        
+        <!-- Logo Display -->
+        <div class="z-10 text-center px-4">
+            <div class="logo-container mb-8 inline-block transform -rotate-1">
+                <h1 class="text-8xl md:text-9xl gothic-font leading-none select-none text-white opacity-90 drop-shadow-[0_5px_15px_rgba(255,255,255,0.2)]">
+                    S<span class="text-gray-600">W</span>
+                </h1>
+                <p class="uppercase tracking-[0.5em] text-sm mt-2 font-black text-gray-400">ShadowWear</p>
+            </div>
+            
+            <h2 class="text-xl md:text-2xl font-light italic mb-10 tracking-widest text-gray-300" data-i18n="hero-tagline">
+                « L'art de rester dans l'ombre »
+            </h2>
+            
+            <p class="max-w-xl mx-auto text-gray-400 text-sm md:text-base leading-relaxed mb-12" data-i18n="hero-desc">
+                Ne pas chercher la lumière des projecteurs, mais imposer son style par son attitude. Authentique. Brut. Souterrain.
+            </p>
+            
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="#collection" class="px-10 py-4 bg-white text-black font-bold uppercase text-xs tracking-widest hover:bg-gray-200 transition-all" data-i18n="btn-decouvrir">Découvrir la collection</a>
+                <a href="#about" class="px-10 py-4 border border-white/20 text-white font-bold uppercase text-xs tracking-widest hover:bg-white/10 transition-all" data-i18n="btn-histoire">Notre histoire</a>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 animate-bounce text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+        </div>
+    </section>
+
+    <!-- Histoire Section -->
+    <section id="about" class="py-24 px-6 bg-[#050505] relative overflow-hidden">
+        <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+            <div class="order-2 md:order-1 relative">
+                <div class="absolute -top-10 -left-10 text-9xl gothic-font text-white/5 select-none">2007</div>
+                <h3 class="text-4xl font-black uppercase mb-8 tracking-tighter border-l-4 border-white pl-6" data-i18n="histoire-heritage">Héritage de Bucarest</h3>
+                <div class="space-y-6 text-gray-400 text-lg leading-relaxed font-light">
+                    <p data-i18n="histoire-bucarest">
+                        ShadowWear est née dans les ruelles sombres de <span class="text-white font-semibold text-shadow-glow">Bucarest</span> en Roumanie. Là où la lumière des projecteurs ne pénètre pas, mais où le style s'impose par la force de l'attitude.
+                    </p>
+                    <p data-i18n="histoire-2007">
+                        Tout a commencé en <span class="text-white text-shadow-glow">octobre 2007</span> avec un groupe de créateurs passionnés par la culture urbaine, le skate et le hip-hop. Leur idée était simple : créer une marque qui représente ceux qui vivent dans l'ombre, loin des tendances imposées.
+                    </p>
+                    <p data-i18n="histoire-armure">
+                        Chaque pièce est pensée comme une <span class="text-white font-semibold italic text-shadow-glow">armure pour la rue</span>, un symbole d'identité pour ceux qui refusent de se fondre dans la masse.
+                    </p>
+                </div>
+            </div>
+            <div class="order-1 md:order-2">
+                <div class="relative group">
+                    <div class="absolute -inset-2 bg-white/10 opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                    <img src="images-Magasins/magasinsRoumanie.png" alt="Urban Bucharest Underground" class="relative grayscale brightness-50 contrast-125 border border-white/20">
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Collection Section -->
+    <section id="collection" class="py-24 px-6">
+
+        </section>
+
+<!-- Timeline Section -->
+<section id="timeline" class="py-24 px-6 bg-black border-y border-white/10">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-20">
+            <h3 class="text-5xl font-black uppercase tracking-tighter text-white mb-4" data-i18n="histoire-titre">Notre Histoire</h3>
+            <p class="text-gray-500 text-sm uppercase tracking-widest" data-i18n="histoire-subtitle">De Bucarest à aujourd'hui</p>
+        </div>
+
+        <!-- Timeline Container -->
+        <div class="relative">
+            <!-- Vertical Line -->
+            <div class="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-white/10 transform md:-translate-x-1/2 timeline-line"></div>
+
+            <!-- Timeline Item 1: 2007 -->
+            <div class="relative mb-16 md:mb-24 timeline-item">
+                <div class="absolute left-8 md:left-1/2 w-4 h-4 bg-white rounded-full transform -translate-x-1/2 z-10 ring-4 ring-black timeline-circle"></div>
+                <div class="ml-20 md:ml-0 md:w-5/12 md:mr-auto md:pr-12 timeline-content">
+                    <div class="inline-block px-4 py-2 bg-white/5 border border-white/20 mb-4 timeline-year">
+                        <span class="text-2xl font-black font-mono">2007</span>
+                    </div>
+                    <h4 class="text-3xl font-black uppercase tracking-tighter mb-2 border-l-4 border-white pl-4" data-i18n="timeline-2007-titre">Les Origines</h4>
+                    <p class="text-gray-400 italic mb-4 pl-4" data-i18n="timeline-2007-subtitle">Une naissance dans l'ombre</p>
+                    <p class="text-gray-400 leading-relaxed" data-i18n="timeline-2007-desc">
+                        ShadowWear voit le jour en octobre 2007, au cœur des ruelles sombres de Bucarest, une métropole roumaine où l'underground dicte ses propres codes. C'est là, loin des projecteurs mais au plus près de la rue, qu'un groupe de créateurs passionnés imagine une marque différente, authentique, brute.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Timeline Item 2: 2008 -->
+            <div class="relative mb-16 md:mb-24 timeline-item">
+                <div class="absolute left-8 md:left-1/2 w-4 h-4 bg-white rounded-full transform -translate-x-1/2 z-10 ring-4 ring-black timeline-circle"></div>
+                <div class="ml-20 md:ml-0 md:w-5/12 md:ml-auto md:pl-12 timeline-content">
+                    <div class="inline-block px-4 py-2 bg-white/5 border border-white/20 mb-4 timeline-year">
+                        <span class="text-2xl font-black font-mono">2008</span>
+                    </div>
+                    <h4 class="text-3xl font-black uppercase tracking-tighter mb-2 border-l-4 border-white pl-4" data-i18n="timeline-2008-titre">La Vision</h4>
+                    <p class="text-gray-400 italic mb-4 pl-4" data-i18n="timeline-2008-subtitle">Donner une voix à ceux qui vivent dans l'ombre</p>
+                    <p class="text-gray-400 leading-relaxed mb-4" data-i18n="timeline-2008-desc">
+                        Les fondateurs, tous plongés dans la culture skate, hip-hop et art urbain, partagent une idée simple : 👉 créer une marque pour ceux qui ne suivent pas les tendances… mais les inspirent. ShadowWear devient rapidement plus qu'un nom : un symbole.
+                    </p>
+                    <ul class="space-y-2">
+                        <li class="flex items-start gap-3">
+                            <span class="text-white mt-1">•</span>
+                            <span class="text-gray-300 italic"><strong class="text-white">Shadow</strong> : <span data-i18n="timeline-2008-shadow">la discrétion, le mystère, la présence silencieuse mais puissante</span></span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-white mt-1">•</span>
+                            <span class="text-gray-300 italic"><strong class="text-white">Wear</strong> : <span data-i18n="timeline-2008-wear">l'expression personnelle, le style comme langage universel</span></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Timeline Item 3: 2017 -->
+            <div class="relative mb-16 md:mb-24 timeline-item">
+                <div class="absolute left-8 md:left-1/2 w-4 h-4 bg-white rounded-full transform -translate-x-1/2 z-10 ring-4 ring-black timeline-circle"></div>
+                <div class="ml-20 md:ml-0 md:w-5/12 md:mr-auto md:pr-12 timeline-content">
+                    <div class="inline-block px-4 py-2 bg-white/5 border border-white/20 mb-4 timeline-year">
+                        <span class="text-2xl font-black font-mono">2017</span>
+                    </div>
+                    <h4 class="text-3xl font-black uppercase tracking-tighter mb-2 border-l-4 border-white pl-4" data-i18n="timeline-2017-titre">Les Premières Créations</h4>
+                    <p class="text-gray-400 italic mb-4 pl-4" data-i18n="timeline-2017-subtitle">L'armure de la rue</p>
+                    <p class="text-gray-400 leading-relaxed" data-i18n="timeline-2017-desc">
+                        Au lancement, la marque propose des hoodies et t-shirts en édition limitée, ornés de designs inspirés des graffitis et des textures urbaines. Chaque pièce est conçue comme une véritable armure urbaine, pensée pour représenter l'identité de ceux qui refusent de se fondre dans la masse.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Timeline Item 4: 2019 -->
+            <div class="relative mb-16 md:mb-24 timeline-item">
+                <div class="absolute left-8 md:left-1/2 w-4 h-4 bg-white rounded-full transform -translate-x-1/2 z-10 ring-4 ring-black timeline-circle"></div>
+                <div class="ml-20 md:ml-0 md:w-5/12 md:ml-auto md:pl-12 timeline-content">
+                    <div class="inline-block px-4 py-2 bg-white/5 border border-white/20 mb-4 timeline-year">
+                        <span class="text-2xl font-black font-mono">2019</span>
+                    </div>
+                    <h4 class="text-3xl font-black uppercase tracking-tighter mb-2 border-l-4 border-white pl-4" data-i18n="timeline-2019-titre">L'Émergence d'un Mouvement</h4>
+                    <p class="text-gray-400 leading-relaxed mb-4" data-i18n="timeline-2019-desc1">
+                        Très vite, ShadowWear dépasse le simple vêtement pour devenir une communauté :
+                    </p>
+                    <ul class="space-y-2 mb-4">
+                        <li class="flex items-start gap-3">
+                            <span class="text-white mt-1">•</span>
+                            <span class="text-gray-300 italic">skaters</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-white mt-1">•</span>
+                            <span class="text-gray-300 italic">rappeurs</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-white mt-1">•</span>
+                            <span class="text-gray-300 italic">graffeurs</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-white mt-1">•</span>
+                            <span class="text-gray-300 italic">créateurs, tous liés par la même philosophie : être soi-même, même dans l'ombre</span>
+                        </li>
+                    </ul>
+                    <p class="text-gray-500 text-sm italic border-t border-white/10 pt-4" data-i18n="timeline-2019-desc2">
+                        La marque évolue, portée par l'énergie de ceux qui vivent la rue comme un terrain d'expression.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Timeline Item 5: 2026 -->
+            <div class="relative mb-16 timeline-item">
+                <div class="absolute left-8 md:left-1/2 w-4 h-4 bg-white rounded-full transform -translate-x-1/2 z-10 ring-4 ring-black timeline-circle"></div>
+                <div class="ml-20 md:ml-0 md:w-5/12 md:mr-auto md:pr-12 timeline-content">
+                    <div class="inline-block px-4 py-2 bg-white/5 border border-white/20 mb-4 timeline-year">
+                        <span class="text-2xl font-black font-mono">2026</span>
+                    </div>
+                    <h4 class="text-3xl font-black uppercase tracking-tighter mb-2 border-l-4 border-white pl-4" data-i18n="timeline-2026-titre">ShadowWear Aujourd'hui</h4>
+                    <p class="text-gray-400 italic mb-4 pl-4" data-i18n="timeline-2026-subtitle">Le streetwear premium venu de l'ombre</p>
+                    <p class="text-gray-400 leading-relaxed mb-4">
+                        Au fil des années, ShadowWear s'impose comme une référence du streetwear premium. La marque mêle aujourd'hui :
+                    </p>
+                    <ul class="space-y-2 mb-4">
+                        <li class="flex items-start gap-3">
+                            <span class="text-white mt-1">•</span>
+                            <span class="text-gray-300 italic" data-i18n="timeline-2026-esthétique">esthétique brute</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-white mt-1">•</span>
+                            <span class="text-gray-300 italic" data-i18n="timeline-2026-qualite">qualité haut de gamme</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-white mt-1">•</span>
+                            <span class="text-gray-300 italic" data-i18n="timeline-2026-designs">designs narratifs, avec des collections qui racontent une histoire à chaque saison — toujours fidèle à ses racines urbaines</span>
+                        </li>
+                    </ul>
+                    <p class="text-gray-500 text-sm italic border-t border-white/10 pt-4" data-i18n="timeline-2026-desc2">
+                        ShadowWear n'est plus seulement une marque. C'est un héritage, un état d'esprit, un mouvement né dans l'ombre.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Final Message -->
+            <div class="text-center mt-20 pt-12 border-t border-white/10">
+                <p class="text-gray-500 uppercase tracking-[0.3em] text-xs mb-4" data-i18n="timeline-continue">
+                    L'ombre continue...
+                </p>
+                <div class="inline-flex items-center gap-2 text-white font-black text-2xl gothic-font">
+                    <span>S</span>
+                    <span class="text-gray-600">W</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Collection Section -->
+<section id="collection" class="py-24 px-6">
+
+    <!-- Significance Section -->
+    <section class="py-20 px-6 border-y border-white/5">
+        <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-12">
+            <div class="text-center md:text-left">
+                <h4 class="gothic-font text-5xl text-white mb-4" data-i18n="timeline-shadow-meaning">Shadow</h4>
+                <p class="text-gray-400" data-i18n="timeline-shadow-desc">Symbole de mystère, de discrétion et de profondeur. Pour ceux qui imposent leur style par leur attitude plutôt que par le besoin d'être vus.</p>
+            </div>
+            <div class="text-center md:text-left">
+                <h4 class="gothic-font text-5xl text-white mb-4" data-i18n="timeline-wear-meaning">Wear</h4>
+                <p class="text-gray-400" data-i18n="timeline-wear-desc">Revendiquer son identité. Une extension de la personnalité sans compromis, transformant le vêtement en langage universel.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collection Section -->
+    <section id="#collection" class="py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
+                <div>
+                    <h3 class="text-5xl font-black uppercase tracking-tighter text-white mb-2" data-i18n="collection-titre">Collection 001</h3>
+                    <p class="text-gray-500 uppercase tracking-widest text-sm" data-i18n="collection-subtitle">Esthétique brute & Qualité Premium</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-bold border-b border-white pb-2 text-white" data-i18n="btn-voir-tout">VOIR TOUT</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- Product 1: Hoodie -->
+                <div class="product-card group" data-id="hoodie-abyss" data-name="Shadow Hoodie &quot;Abyss&quot;" data-price="80.00" data-image="Produits/Hoodies.png">
+                    <div class="relative overflow-hidden bg-[#111] mb-6 border border-white/5 min-h-[500px] flex items-center justify-center">
+                        <!-- Image Statique -->
+                        <img src="Produits/Hoodies.png" 
+                             alt="Shadow Hoodie Abyss" 
+                             class="static-img w-full h-full object-cover transition-opacity duration-500">
+                        
+                        <!-- Viewer 3D (masqué par défaut) -->
+                        <model-viewer 
+                            class="hidden-3d absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-500"
+                            src="models/quilted hooded jacket 3d model.glb" 
+                            alt="Shadow Hoodie 3D" 
+                            auto-rotate 
+                            camera-controls 
+                            shadow-intensity="2" 
+                            exposure="0.5">
+                        </model-viewer>
+
+                        <!-- Overlay Bouton -->
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="activate3D(this)" class="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-200 transition-all">Lancer la vue 3D</button>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-1 uppercase tracking-tighter">Shadow Hoodie "Abyss"</h4>
+                    <p class="text-gray-500 text-sm mb-4">Coton premium - 450 GSM</p>
+                    <div class="mb-4">
+                        <label class="text-gray-400 text-xs uppercase tracking-widest block mb-2">Taille</label>
+                        <div class="flex gap-2">
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="S">S</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="M">M</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="L">L</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="XL">XL</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-white/10 pt-4">
+                        <span class="text-white font-mono">80.00€</span>
+                        <button onclick="addToCartWithSize('hoodie-abyss', 'Shadow Hoodie Abyss', 80.00, 'Produits/Hoodies.png')" class="text-xs font-bold uppercase hover:text-white transition-colors flex items-center gap-2 group/btn add-to-cart-btn">
+                            <span>Ajouter au panier</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product 2: T-shirt -->
+                <div class="product-card group" data-id="tshirt-ghost" data-name="Street T-Shirt &quot;Ghost&quot;" data-price="40.00" data-image="Produits/T-shirt.png">
+                    <div class="relative overflow-hidden bg-[#111] mb-6 border border-white/5 min-h-[500px] flex items-center justify-center">
+                        <img src="Produits/T-shirt.png" 
+                             alt="Street T-Shirt Ghost" 
+                             class="static-img w-full h-full object-cover transition-opacity duration-500">
+                        
+                        <model-viewer 
+                            class="hidden-3d absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-500"
+                            src="models/graphic t-shirt 3d model.glb" 
+                            alt="Street T-Shirt 3D" 
+                            auto-rotate 
+                            camera-controls 
+                            shadow-intensity="2">
+                        </model-viewer>
+
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="activate3D(this)" class="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-200 transition-all">Lancer la vue 3D</button>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-1 uppercase tracking-tighter">Street T-Shirt "Ghost"</h4>
+                    <p class="text-gray-500 text-sm mb-4">Coupe Oversized - Bucarest Edition</p>
+                    <div class="mb-4">
+                        <label class="text-gray-400 text-xs uppercase tracking-widest block mb-2">Taille</label>
+                        <div class="flex gap-2">
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="S">S</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="M">M</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="L">L</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="XL">XL</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-white/10 pt-4">
+                        <span class="text-white font-mono">40.00€</span>
+                        <button onclick="addToCartWithSize('tshirt-ghost', 'Street T-Shirt Ghost', 40.00, 'Produits/T-shirt.png')" class="text-xs font-bold uppercase hover:text-white transition-colors flex items-center gap-2 group/btn add-to-cart-btn">
+                            <span>Ajouter au panier</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product 3: Jogger -->
+                <div class="product-card group" data-id="jeans-underground" data-name="Underground Jeans" data-price="60.00" data-image="Produits/Pantalon.png">
+                    <div class="relative overflow-hidden bg-[#111] mb-6 border border-white/5 min-h-[500px] flex items-center justify-center">
+                        <img src="Produits/Pantalon.png" 
+                             alt="Underground Jogger" 
+                             class="static-img w-full h-full object-cover transition-opacity duration-500">
+                        
+                        <model-viewer 
+                            class="hidden-3d absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-500"
+                            src="models/denim jeans 3d model.glb" 
+                            alt="Underground Jogger 3D" 
+                            auto-rotate 
+                            camera-controls 
+                            shadow-intensity="2">
+                        </model-viewer>
+
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="activate3D(this)" class="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-200 transition-all">Lancer la vue 3D</button>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-1 uppercase tracking-tighter">Underground Jeans</h4>
+                    <p class="text-gray-500 text-sm mb-4">Structure Large - Toile renforcée</p>
+                    <div class="mb-4">
+                        <label class="text-gray-400 text-xs uppercase tracking-widest block mb-2">Taille</label>
+                        <div class="flex gap-2">
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="S">S</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="M">M</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="L">L</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="XL">XL</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-white/10 pt-4">
+                        <span class="text-white font-mono">60.00€</span>
+                        <button onclick="addToCartWithSize('jeans-underground', 'Underground Jeans', 60.00, 'Produits/Pantalon.png')" class="text-xs font-bold uppercase hover:text-white transition-colors flex items-center gap-2 group/btn add-to-cart-btn">
+                            <span>Ajouter au panier</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collection Section 002 -->
+    <section id="collection-002" class="py-24 px-6 bg-[#050505]">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
+                <div>
+                    <h3 class="text-5xl font-black uppercase tracking-tighter text-white mb-2">Collection 002</h3>
+                    <p class="text-gray-500 uppercase tracking-widest text-sm">Accessoires & Layering - Édition Limitée</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-bold border-b border-white pb-2 text-white">VOIR TOUT</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- Product 1: Track Jacket -->
+                <div class="product-card group" data-id="jacket-shadow" data-name="Shadow Track Jacket" data-price="120.00" data-image="Produits/Hoodies.png">
+                    <div class="relative overflow-hidden bg-[#111] mb-6 border border-white/5 min-h-[500px] flex items-center justify-center">
+                        <img src="Produits/Sweatt.png" 
+                             alt="Shadow Track Jacket" 
+                             class="static-img w-full h-full object-cover transition-opacity duration-500">
+                        
+                        <model-viewer 
+                            class="hidden-3d absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-500"
+                            src="models/Sweatt.glb" 
+                            alt="Shadow Track Jacket 3D" 
+                            auto-rotate 
+                            camera-controls 
+                            shadow-intensity="2" 
+                            exposure="0.5">
+                        </model-viewer>
+
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="activate3D(this)" class="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-200 transition-all">Lancer la vue 3D</button>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-1 uppercase tracking-tighter">Shadow Track Jacket</h4>
+                    <p class="text-gray-500 text-sm mb-4">Nylon recyclé - Doublure mesh</p>
+                    <div class="mb-4">
+                        <label class="text-gray-400 text-xs uppercase tracking-widest block mb-2">Taille</label>
+                        <div class="flex gap-2">
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="S">S</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="M">M</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="L">L</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="XL">XL</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-white/10 pt-4">
+                        <span class="text-white font-mono">120.00€</span>
+                        <button onclick="addToCartWithSize('jacket-shadow', 'Shadow Track Jacket', 120.00, 'Produits/Sweatt.png')" class="text-xs font-bold uppercase hover:text-white transition-colors flex items-center gap-2 group/btn add-to-cart-btn">
+                            <span>Ajouter au panier</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product 2: Cap -->
+                <div class="product-card group" data-id="cap-shadow" data-name="Shadow Snapback Cap" data-price="35.00" data-image="Produits/casquette.png">
+                    <div class="relative overflow-hidden bg-[#111] mb-6 border border-white/5 min-h-[500px] flex items-center justify-center">
+                        <img src="Produits/casquette.png" 
+                             alt="Shadow Snapback Cap" 
+                             class="static-img w-full h-full object-cover transition-opacity duration-500">
+                        
+                        <model-viewer 
+                            class="hidden-3d absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-500"
+                            src="models/casquette.glb" 
+                            alt="Shadow Cap 3D" 
+                            auto-rotate 
+                            camera-controls 
+                            shadow-intensity="2">
+                        </model-viewer>
+
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="activate3D(this)" class="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-200 transition-all">Lancer la vue 3D</button>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-1 uppercase tracking-tighter">Shadow Snapback Cap</h4>
+                    <p class="text-gray-500 text-sm mb-4">Coton twill - Boucle réglable</p>
+                    <div class="mb-4">
+                        <label class="text-gray-400 text-xs uppercase tracking-widest block mb-2">Style</label>
+                        <div class="flex gap-2">
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="Noir">Noir</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="Gris">Gris</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="Blanc">Blanc</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-white/10 pt-4">
+                        <span class="text-white font-mono">35.00€</span>
+                        <button onclick="addToCartWithSize('cap-shadow', 'Shadow Snapback Cap', 35.00, 'Produits/casquette.png')" class="text-xs font-bold uppercase hover:text-white transition-colors flex items-center gap-2 group/btn add-to-cart-btn">
+                            <span>Ajouter au panier</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product 3: Messenger Bag -->
+                <div class="product-card group" data-id="bag-urban" data-name="Urban Messenger Bag" data-price="95.00" data-image="Produits/bag.png">
+                    <div class="relative overflow-hidden bg-[#111] mb-6 border border-white/5 min-h-[500px] flex items-center justify-center">
+                        <img src="Produits/bag.png" 
+                             alt="Urban Messenger Bag" 
+                             class="static-img w-full h-full object-cover transition-opacity duration-500">
+                        
+                        <model-viewer 
+                            class="hidden-3d absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-500"
+                            src="models/bag.glb" 
+                            alt="Urban Messenger Bag 3D" 
+                            auto-rotate 
+                            camera-controls 
+                            shadow-intensity="2">
+                        </model-viewer>
+
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="activate3D(this)" class="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-200 transition-all">Lancer la vue 3D</button>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-1 uppercase tracking-tighter">Urban Messenger Bag</h4>
+                    <p class="text-gray-500 text-sm mb-4">Toile épaisse - Compartiments multiples</p>
+                    <div class="mb-4">
+                        <label class="text-gray-400 text-xs uppercase tracking-widest block mb-2">Capacité</label>
+                        <div class="flex gap-2">
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="15L">15L</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="20L">20L</button>
+                            <button class="w-10 h-10 border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition-all size-btn" data-size="25L">25L</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-white/10 pt-4">
+                        <span class="text-white font-mono">95.00€</span>
+                        <button onclick="addToCartWithSize('bag-urban', 'Urban Messenger Bag', 95.00, 'Produits/bag.png')" class="text-xs font-bold uppercase hover:text-white transition-colors flex items-center gap-2 group/btn add-to-cart-btn">
+                            <span>Ajouter au panier</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Avis Section -->
+    <section id="avis" class="py-24 px-6 bg-black border-t border-white/10">
+        <div class="max-w-7xl mx-auto">
+            <!-- Section Header -->
+            <div class="text-center mb-16">
+                <h3 class="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white mb-4" data-i18n="avis-titre">Avis Clients</h3>
+                <p class="text-gray-500 text-sm md:text-base max-w-2xl mx-auto" data-i18n="avis-subtitle">
+                    Découvrez ce que nos clients pensent de la collection ShadowWear. Des avis authentiques qui témoignent de la qualité de nos créations.
+                </p>
+            </div>
+
+            <!-- Avis Grid -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Avis 1 -->
+                <div class="bg-[#1a1a1a] border border-white/10 p-6 hover:border-white/30 transition-colors group">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6 italic">"La qualité est exceptionnelle. Les vêtements sont confortables tout en restant élégants. J'ai eu un coup de cœur pour la collection automne."</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+                        <div class="h-10 w-10 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full"></div>
+                        <div>
+                            <p class="text-white font-bold text-sm">Marie Durand</p>
+                            <p class="text-gray-500 text-xs">Client depuis 2022</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avis 2 -->
+                <div class="bg-[#1a1a1a] border border-white/10 p-6 hover:border-white/30 transition-colors group">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6 italic">"Service client impeccable et livraison rapide. Les produits sont à la hauteur de mes attentes. Je recommande ShadowWear sans hésiter!"</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+                        <div class="h-10 w-10 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full"></div>
+                        <div>
+                            <p class="text-white font-bold text-sm">Alexandre Martin</p>
+                            <p class="text-gray-500 text-xs">Client depuis 2023</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avis 3 -->
+                <div class="bg-[#1a1a1a] border border-white/10 p-6 hover:border-white/30 transition-colors group">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6 italic">"Le design est magnifique et vraiment original. ShadowWear m'a permis de créer mon propre style. C'est devenu ma marque préférée!"</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+                        <div class="h-10 w-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full"></div>
+                        <div>
+                            <p class="text-white font-bold text-sm">Sophie Laurent</p>
+                            <p class="text-gray-500 text-xs">Client depuis 2021</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avis 4 -->
+                <div class="bg-[#1a1a1a] border border-white/10 p-6 hover:border-white/30 transition-colors group">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6 italic">"Investi dans plusieurs pièces et je ne regrette aucun achat. La durabilité est au rendez-vous, les tissus sont d'excellent qualité."</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+                        <div class="h-10 w-10 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full"></div>
+                        <div>
+                            <p class="text-white font-bold text-sm">Thomas Benoit</p>
+                            <p class="text-gray-500 text-xs">Client depuis 2022</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avis 5 -->
+                <div class="bg-[#1a1a1a] border border-white/10 p-6 hover:border-white/30 transition-colors group">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="gray-600" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6 italic">"Très bon produit global. Petit bémol sur les délais de livraison, mais le SAV a résolu le problème rapidement. Je suis satisfait."</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+                        <div class="h-10 w-10 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full"></div>
+                        <div>
+                            <p class="text-white font-bold text-sm">Nicolas Petit</p>
+                            <p class="text-gray-500 text-xs">Client depuis 2023</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avis 6 -->
+                <div class="bg-[#1a1a1a] border border-white/10 p-6 hover:border-white/30 transition-colors group">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6 italic">"Une marque française de qualité. Les créations reflètent une vraie vision artistique. Je vous recommande vivement d'essayer!"</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+                        <div class="h-10 w-10 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full"></div>
+                        <div>
+                            <p class="text-white font-bold text-sm">Isabelle Leclerc</p>
+                            <p class="text-gray-500 text-xs">Client depuis 2021</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sponsor Section avec vidéo Anyme -->
+    <section id="sponsor" class="py-24 px-6 bg-black border-t border-white/10">
+        <div class="max-w-7xl mx-auto">
+            <!-- Section Header -->
+            <div class="text-center mb-16">
+                <h3 class="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white mb-4" data-i18n="sponsor-titre">Sponsors</h3>
+                <p class="text-gray-500 text-sm md:text-base max-w-2xl mx-auto" data-i18n="sponsor-subtitle">
+                    ShadowWear s'entoure de talents et créateurs reconnus pour amplifier sa vision unique.
+                </p>
+            </div>
+
+            <!-- Sponsors Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Anyme Sponsor Card -->
+                <div class="bg-[#1a1a1a] border border-white/10 p-8 hover:border-white/30 transition-colors group">
+                    <div class="relative mb-8 overflow-hidden rounded-sm bg-black">
+                        <iframe 
+                            width="100%" 
+                            height="400" 
+                            src="sponsor/Fashion_Film_ShadowWear_Advertisement.mp4" 
+                            title="Anyme - Sponsor" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            referrerpolicy="strict-origin-when-cross-origin" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                    <div class="space-y-4">
+                        <h4 class="text-2xl font-black text-white uppercase tracking-tighter">Anyme</h4>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            Créateur de contenu visionnaire et ambassadeur de la culture underground. Anyme incarne l'esprit ShadowWear : authentique, brut et sans compromis. Sa collaboration avec ShadowWear reflète une vision commune de l'esthétique urbaine et du refus des conventions.
+                        </p>
+                        <div class="flex gap-4 pt-4">
+                            <a href="https://www.youtube.com/@Anyme0233" class="px-6 py-2 border border-white/20 text-white uppercase text-xs tracking-widest font-bold hover:bg-white/10 transition-all">Découvrir</a>
+                            <a href="https://www.instagram.com/anyme023/?hl=fr" class="px-6 py-2 bg-white text-black uppercase text-xs tracking-widest font-bold hover:bg-gray-200 transition-all">Suivre</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sponsor Info -->
+                <div class="space-y-8">
+                    <div class="border-l-4 border-white pl-6">
+                        <h5 class="text-white font-bold uppercase tracking-wider text-lg mb-2">Partenariat Créatif</h5>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            Anyme nous aide à raconter l'histoire de ShadowWear à travers une perspective authentique. Ensemble, nous créons du contenu qui résonne avec notre communauté.
+                        </p>
+                    </div>
+                    
+                    <div class="border-l-4 border-white pl-6">
+                        <h5 class="text-white font-bold uppercase tracking-wider text-lg mb-2">Contenu Exclusif</h5>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            Accédez à des making-of, des interviews et des moments en coulisses de la collaboration ShadowWear x Anyme. Du contenu exclusif rien que pour vous.
+                        </p>
+                    </div>
+                    
+                    <div class="border-l-4 border-white pl-6">
+                        <h5 class="text-white font-bold uppercase tracking-wider text-lg mb-2">Réductions Exclusives</h5>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            Utilisez le code "ANYME20" pour bénéficier d'une réduction de 20% sur toute la collection ShadowWear. Valable jusqu'à fin décembre.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Magasins Section with Map -->
+    <section id="magasins" class="py-24 px-6 bg-[#050505] border-t border-white/10">
+        <div class="max-w-7xl mx-auto">
+            <!-- Section Header -->
+            <div class="text-center mb-16">
+                <h3 class="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white mb-4" data-i18n="magasins-titre">Nos Magasins</h3>
+                <p class="text-gray-500 text-sm md:text-base max-w-2xl mx-auto" data-i18n="magasins-subtitle">
+                    Découvrez nos points de vente à travers l'Europe. De Bucarest à Paris, vivez l'expérience ShadowWear en boutique.
+                </p>
+            </div>
+
+            <!-- Map Container -->
+            <div class="mb-12">
+                <div id="map" class="rounded-sm shadow-2xl"></div>
+            </div>
+
+            <!-- Store List -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Bucarest -->
+                <div class="bg-white/5 border border-white/10 p-6 rounded-sm hover:bg-white/10 transition-all">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h4 class="text-white font-bold uppercase tracking-wider mb-1">Bucarest</h4>
+                            <p class="text-gray-500 text-xs uppercase tracking-widest">Flagship Store</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Strada Lipscani 25<br>București 030033, Roumanie</p>
+                    <div class="text-xs text-gray-500 space-y-1">
+                        <p>Lun - Sam: 10:00 - 20:00</p>
+                        <p>Dim: 12:00 - 18:00</p>
+                    </div>
+                </div>
+
+                <!-- Worthing -->
+                <div class="bg-white/5 border border-white/10 p-6 rounded-sm hover:bg-white/10 transition-all">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h4 class="text-white font-bold uppercase tracking-wider mb-1">Worthing</h4>
+                            <p class="text-gray-500 text-xs uppercase tracking-widest">Store</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Montague Street<br>Worthing BN11 3BG, Angleterre</p>
+                    <div class="text-xs text-gray-500 space-y-1">
+                        <p>Lun - Sam: 09:00 - 18:00</p>
+                        <p>Dim: 11:00 - 17:00</p>
+                    </div>
+                </div>
+
+                <!-- The Mall Athens -->
+                <div class="bg-white/5 border border-white/10 p-6 rounded-sm hover:bg-white/10 transition-all">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h4 class="text-white font-bold uppercase tracking-wider mb-1">The Mall Athens</h4>
+                            <p class="text-gray-500 text-xs uppercase tracking-widest">Store</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Andrea Papandreou 35<br>15122 Maroussi, Athènes, Grèce</p>
+                    <div class="text-xs text-gray-500 space-y-1">
+                        <p>Lun - Sam: 10:00 - 21:00</p>
+                        <p>Dim: 11:00 - 20:00</p>
+                    </div>
+                </div>
+
+                <!-- Barcelona -->
+                <div class="bg-white/5 border border-white/10 p-6 rounded-sm hover:bg-white/10 transition-all">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h4 class="text-white font-bold uppercase tracking-wider mb-1">Barcelone</h4>
+                            <p class="text-gray-500 text-xs uppercase tracking-widest">Store</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Carrer del Rec 18<br>08003 Barcelona, Espagne</p>
+                    <div class="text-xs text-gray-500 space-y-1">
+                        <p>Lun - Sam: 11:00 - 21:00</p>
+                        <p>Dim: 12:00 - 20:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Organigramme Section -->
+    <section id="organigramme" class="py-24 px-6 bg-[#050505] border-t border-white/10 pb-40">
+        <div class="max-w-6xl mx-auto text-center mb-12">
+            <h3 class="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white mb-4" data-i18n="organigramme-titre">Organigramme</h3>
+            <p class="text-gray-500 text-sm md:text-base max-w-2xl mx-auto" data-i18n="organigramme-subtitle">
+                Structure interne de ShadowWear. Cliquez sur une personne pour consulter sa fiche de poste en PDF.
+            </p>
+        </div>
+
+        <!-- Arbre d'organigramme -->
+        <div class="max-w-6xl mx-auto flex flex-col items-center text-sm md:text-base">
+            
+            <!-- DIRECTION GÉNÉRALE -->
+            <div class="relative mb-12">
+                <div onclick="openPdfModal('Popa Dimitru - CEO / Fondateur', 'Direction Générale', 'Fiches de postes/En PDF/Popa Dimitru (CEO,Fondateur).pdf')" 
+                     class="org-item px-8 py-5 border-2 border-white/30 bg-gradient-to-br from-black/80 to-black/60 rounded-sm shadow-2xl">
+                    <p class="text-white font-black uppercase tracking-wider text-lg mb-1">Popa Dimitru</p>
+                    <p class="text-gray-400 text-sm uppercase tracking-widest">CEO / Fondateur</p>
+                    <p class="text-xs text-gray-500 mt-2 normal-case tracking-normal italic">📄 Cliquez pour la fiche de poste</p>
+                </div>
+                <div class="w-px h-12 bg-white/20 mx-auto"></div>
+            </div>
+
+            <!-- NIVEAU 2 - DIRECTIONS -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 w-full mb-12">
+                
+                <!-- PÔLE ARTISTIQUE -->
+                <div class="flex flex-col items-center">
+                    <div class="w-full space-y-3">
+                        <div class="text-center mb-4">
+                            <h4 class="text-white font-bold uppercase text-xs tracking-widest border-b border-white/20 pb-2">Pôle Artistique</h4>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Menicucci Louca - Directeur Artistique', 'Pôle Artistique', 'Fiches de postes/En PDF/Menicucci Louca Directeur Artistique.pdf')" 
+                             class="org-item px-4 py-3 border border-white/20 bg-black/50 rounded-sm">
+                            <p class="text-white font-bold text-base">Menicucci Louca</p>
+                            <p class="text-gray-400 text-xs uppercase tracking-wider">Directeur Artistique</p>
+                            <p class="text-xs text-gray-600 mt-1">📄 Fiche</p>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Tirole Harlin - Responsable Artistique', 'Pôle Artistique', 'Fiches de postes/En PDF/Tirole Harlin Responsable Artistique.pdf')" 
+                             class="org-item px-4 py-3 border border-white/15 bg-black/40 rounded-sm">
+                            <p class="text-white font-semibold text-base">Tirole Harlin</p>
+                            <p class="text-gray-400 text-xs uppercase tracking-wider">Responsable Artistique</p>
+                            <p class="text-xs text-gray-600 mt-1">📄 Fiche</p>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Ishikawa Nishida - Designer', 'Pôle Artistique', 'Fiches de postes/En PDF/Ishikawa Nishida Designer.pdf')" 
+                             class="org-item px-3 py-2 border border-white/10 bg-black/30 rounded-sm">
+                            <p class="text-gray-300 font-medium text-sm">Ishikawa Nishida</p>
+                            <p class="text-gray-500 text-xs uppercase">Designer</p>
+                            <p class="text-xs text-gray-600 mt-1">📄</p>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Grebennikov Jénia - Designer', 'Pôle Artistique', 'Fiches de postes/En PDF/Grebennikov Jénia Designer.pdf')" 
+                             class="org-item px-3 py-2 border border-white/10 bg-black/30 rounded-sm">
+                            <p class="text-gray-300 font-medium text-sm">Grebennikov Jénia</p>
+                            <p class="text-gray-500 text-xs uppercase">Designer</p>
+                            <p class="text-xs text-gray-600 mt-1">📄</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PÔLE MARKETING & COMMUNICATION -->
+                <div class="flex flex-col items-center">
+                    <div class="w-full space-y-3">
+                        <div class="text-center mb-4">
+                            <h4 class="text-white font-bold uppercase text-xs tracking-widest border-b border-white/20 pb-2">Pôle Marketing</h4>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Heuberger Lise - Responsable Marketing', 'Pôle Marketing & Communication', 'Fiches de postes/En PDF/Heuberger Lise Marketing & COM.pdf')" 
+                             class="org-item px-4 py-3 border border-white/20 bg-black/50 rounded-sm">
+                            <p class="text-white font-bold text-base">Heuberger Lise</p>
+                            <p class="text-gray-400 text-xs uppercase tracking-wider">Responsable Marketing</p>
+                            <p class="text-xs text-gray-600 mt-1">📄 Fiche</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PÔLE COMMERCIAL -->
+                <div class="flex flex-col items-center">
+                    <div class="w-full space-y-3">
+                        <div class="text-center mb-4">
+                            <h4 class="text-white font-bold uppercase text-xs tracking-widest border-b border-white/20 pb-2">Pôle Commercial</h4>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Samuel Etienne - Responsable Vente', 'Pôle Commercial', 'Fiches de postes/En PDF/Samuel Etienne Responsable de la Vente.pdf')" 
+                             class="org-item px-4 py-3 border border-white/20 bg-black/50 rounded-sm">
+                            <p class="text-white font-bold text-base">Samuel Etienne</p>
+                            <p class="text-gray-400 text-xs uppercase tracking-wider">Resp. de la Vente</p>
+                            <p class="text-xs text-gray-600 mt-1">📄 Fiche</p>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Camielo Joseph - Vendeur', 'Pôle Commercial', 'Fiches de postes/En PDF/Camielo Joseph Vendeur.pdf')" 
+                             class="org-item px-3 py-2 border border-white/10 bg-black/30 rounded-sm">
+                            <p class="text-gray-300 font-medium text-sm">Camielo Joseph</p>
+                            <p class="text-gray-500 text-xs uppercase">Vendeur</p>
+                            <p class="text-xs text-gray-600 mt-1">📄</p>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Koeberle-Yakov Ilya - Vendeur', 'Pôle Commercial', 'Fiches de postes/En PDF/Koeberle-Yakov Ilya Vendeur.pdf')" 
+                             class="org-item px-3 py-2 border border-white/10 bg-black/30 rounded-sm">
+                            <p class="text-gray-300 font-medium text-sm">Koeberle-Yakov Ilya</p>
+                            <p class="text-gray-500 text-xs uppercase">Vendeur</p>
+                            <p class="text-xs text-gray-600 mt-1">📄</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PÔLE PRODUCTION & SERVICE CLIENT -->
+                <div class="flex flex-col items-center">
+                    <div class="w-full space-y-3">
+                        <div class="text-center mb-4">
+                            <h4 class="text-white font-bold uppercase text-xs tracking-widest border-b border-white/20 pb-2">Production & Service</h4>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Casard Leo - Production & Logistique', 'Pôle Production', 'Fiches de postes/En PDF/Casard Leo Production & Logistique.pdf')" 
+                             class="org-item px-4 py-3 border border-white/20 bg-black/50 rounded-sm">
+                            <p class="text-white font-bold text-base">Casard Leo</p>
+                            <p class="text-gray-400 text-xs uppercase tracking-wider">Production & Logistique</p>
+                            <p class="text-xs text-gray-600 mt-1">📄 Fiche</p>
+                        </div>
+                        
+                        <div onclick="openPdfModal('Baltazar Brat - Service Client', 'Pôle Service Client', 'Fiches de postes/En PDF/Baltazar Brat Service Client.pdf')" 
+                             class="org-item px-4 py-3 border border-white/20 bg-black/50 rounded-sm">
+                            <p class="text-white font-bold text-base">Baltazar Brat</p>
+                            <p class="text-gray-400 text-xs uppercase tracking-wider">Service Client</p>
+                            <p class="text-xs text-gray-600 mt-1">📄 Fiche</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARTENAIRES -->
+            <div class="w-full max-w-md mt-8">
+                <div class="text-center mb-4">
+                    <h4 class="text-white font-bold uppercase text-xs tracking-widest border-b border-white/20 pb-2 inline-block px-6">Partenaires</h4>
+                </div>
+                <div onclick="openPdfModal('AEI TEXTILS - Partenaire Textile', 'Partenaires & Fournisseurs', 'Fiches de postes/En PDF/AEI TEXTIL Partenaires & Fournisseurs.pdf')" 
+                     class="org-item px-6 py-4 border border-white/20 bg-black/40 rounded-sm text-center">
+                    <p class="text-white font-bold text-base">AEI TEXTILS</p>
+                    <p class="text-gray-400 text-xs uppercase tracking-wider">Partenaire & Fournisseur Textile</p>
+                    <p class="text-xs text-gray-600 mt-1">📄 Fiche partenaire</p>
+                </div>
+            </div>
+        </div>
+
+        <p>   </p>
+
+    <!-- Footer / Contact -->
+    <footer id="contact" class="bg-black py-20 px-6 border-t border-white/10">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
+            <div class="col-span-1 md:col-span-2">
+                <h3 class="gothic-font text-6xl text-white mb-6">S<span class="text-gray-600">W</span></h3>
+                <p class="text-gray-500 max-w-sm mb-8 italic">
+                    « L'art de rester dans l'ombre » - ShadowWear est un mouvement, une communauté de créateurs qui partagent la même vision.
+                </p>
+                <div class="flex gap-6">
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Instagram</a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">TikTok</a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Twitter</a>
+                </div>
+            </div>
+            <div>
+                <h5 class="text-white font-bold uppercase text-xs tracking-widest mb-6">Navigation</h5>
+                <ul class="space-y-4 text-gray-500 text-sm">
+                    <li><a href="#home" class="hover:text-white transition-colors">Accueil</a></li>
+                    <li><a href="#about" class="hover:text-white transition-colors">Histoire</a></li>
+                    <li><a href="#collection" class="hover:text-white transition-colors">Collection</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Mentions Légales</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-white font-bold uppercase text-xs tracking-widest mb-6">Newsletter</h5>
+                <p class="text-gray-500 text-xs mb-4">Rejoignez l'ombre pour les sorties limitées.</p>
+                <form class="flex border-b border-white/20 pb-2">
+                    <input type="email" placeholder="Email" class="bg-transparent border-none text-white focus:outline-none text-sm w-full italic">
+                    <button class="text-white text-xs font-bold uppercase">S'abonner</button>
+                </form>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5">
+            <div class="mb-8">
+                <p class="text-gray-600 uppercase text-xs tracking-widest font-bold mb-4" data-i18n="footer-moyens">Moyens de paiement acceptés</p>
+                <div class="flex gap-4 flex-wrap">
+                    <div class="flex items-center justify-center w-16 h-10 bg-blue-600 rounded text-white text-xs font-bold">VISA</div>
+                    <div class="flex items-center justify-center w-16 h-10 bg-red-600 rounded text-white text-xs font-bold">MC</div>
+                    <div class="flex items-center justify-center w-16 h-10 bg-yellow-500 rounded text-gray-900 text-xs font-bold">AMEX</div>
+                    <div class="flex items-center justify-center w-16 h-10 bg-blue-500 rounded text-white text-xs font-bold">PayPal</div>
+                    <div class="flex items-center justify-center w-16 h-10 bg-orange-600 rounded text-white text-xs font-bold">Apple Pay</div>
+                    <div class="flex items-center justify-center w-16 h-10 bg-purple-600 rounded text-white text-xs font-bold">Google Pay</div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center text-[10px] text-gray-600 uppercase tracking-[0.2em]">
+                <p>&copy; 2007-2026 ShadowWear S.A. Bucarest</p>
+                <p>Projet BTS SIO</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-[80] transform translate-y-20 opacity-0 transition-all duration-300">
+        <div class="bg-white text-black px-6 py-4 rounded-sm shadow-2xl flex items-center gap-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span id="toastMessage" class="text-sm font-bold uppercase tracking-wider">Article ajouté au panier</span>
+        </div>
+    </div>
+
+    <script>
+        // Cart State
+        let cart = JSON.parse(localStorage.getItem('shadowwear_cart')) || [];
+        let appliedPromo = null;
+        let discountPercent = 0;
+
+        // Promo Codes Database
+        const promoCodes = {
+            'ANYME20': 20,
+            'BUCAREST15': 15,
+            'BARCELONE10': 10,
+            'WORTHING25': 25
+        };
+
+        // DOM Elements
+        const cartPanel = document.getElementById('cartPanel');
+        const cartOverlay = document.getElementById('cartOverlay');
+        const cartItems = document.getElementById('cartItems');
+        const cartBadge = document.getElementById('cartBadge');
+        const cartCountHeader = document.getElementById('cartCountHeader');
+        const cartSubtotal = document.getElementById('cartSubtotal');
+        const cartTotal = document.getElementById('cartTotal');
+        const cartFooter = document.getElementById('cartFooter');
+        const emptyCart = document.getElementById('emptyCart');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const promoInput = document.getElementById('promoInput');
+        const promoMessage = document.getElementById('promoMessage');
+        const discountSection = document.getElementById('discountSection');
+        const discountAmount = document.getElementById('discountAmount');
+
+        // PDF Modal Elements
+        const pdfModal = document.getElementById('pdfModal');
+        const pdfModalTitle = document.getElementById('pdfModalTitle');
+        const pdfModalSubtitle = document.getElementById('pdfModalSubtitle');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const pdfDownloadLink = document.getElementById('pdfDownloadLink');
+
+        // Initialize cart on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartUI();
+        });
+
+        // PDF Modal Functions
+    function openPdfModal(title, subtitle, pdfPath) {
+        pdfModalTitle.textContent = title;
+        pdfModalSubtitle.textContent = subtitle;
+        pdfViewer.src = pdfPath;
+    
+        // Configurer le lien de téléchargement avec le bon chemin
+        const fileName = title.replace(/\s+/g, '_').replace(/[\/\\]/g, '-').toLowerCase() + '.pdf';
+        pdfDownloadLink.href = pdfPath;
+        pdfDownloadLink.setAttribute('download', fileName);
+    
+        pdfModal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        }
+        function closePdfModal() {
+            pdfModal.classList.remove('open');
+            document.body.style.overflow = '';
+            // Clear iframe after animation
+            setTimeout(() => {
+                pdfViewer.src = '';
+            }, 300);
+        }
+
+        // Close PDF modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePdfModal();
+                closeCart();
+            }
+        });
+
+        // Close PDF modal when clicking on overlay
+        pdfModal.addEventListener('click', (e) => {
+            if (e.target === pdfModal) {
+                closePdfModal();
+            }
+        });
+
+        // Initialize Map
+        function initMap() {
+            // Create map centered on Europe
+            const map = L.map('map').setView([48.8566, 8.0], 4.5);
+
+            // Dark tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(map);
+
+            // Custom marker icon (white to match design)
+            const customIcon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: white; width: 12px; height: 12px; border-radius: 50%; border: 3px solid #0a0a0a; box-shadow: 0 0 10px rgba(255,255,255,0.5);"></div>`,
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+            });
+
+            // Store locations
+            const stores = [
+                {
+                    name: 'Bucarest - Flagship Store',
+                    coords: [44.4268, 26.1025],
+                    address: 'Strada Lipscani 25<br>bucurești 030033, Roumanie',
+                    hours: 'Lun - Sam: 10:00 - 20:00<br>Dim: 12:00 - 18:00',
+                    image: 'images-Magasins/magasinsRoumanie.png'
+                },
+                {
+                    name: 'Worthing',
+                    coords: [50.8142, -0.3714],
+                    address: 'Montague Street<br>Worthing BN11 3BG, Angleterre',
+                    hours: 'Lun - Sam: 09:00 - 18:00<br>Dim: 11:00 - 17:00',
+                    image: 'images-Magasins/MagasinsWorthing.png'
+                },
+                {
+                    name: 'The Mall Athens',
+                    coords: [37.9950, 23.8638],
+                    address: 'Andrea Papandreou 35<br>15122 Maroussi, Athènes, Grèce',
+                    hours: 'Lun - Sam: 10:00 - 21:00<br>Dim: 11:00 - 20:00',
+                    image: 'images-Magasins/MagasinsGrece.png'
+                },
+                {
+                    name: 'Barcelone',
+                    coords: [41.3874, 2.1686],
+                    address: 'Carrer del Rec 18<br>08003 Barcelona, Espagne',
+                    hours: 'Lun - Sam: 11:00 - 21:00<br>Dim: 12:00 - 20:00',
+                    image: 'images-Magasins/MagasinsBarcelone.png'
+                }
+            ];
+
+            // Add markers
+            stores.forEach(store => {
+                const marker = L.marker(store.coords, { icon: customIcon }).addTo(map);
+                
+                const popupContent = `
+                    <div class="p-3" style="font-family: 'Inter', sans-serif;">
+                        <img src="${store.image}" alt="${store.name}" style="width: 120px; height: 80px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; display: block; filter: grayscale(1); transition: filter 0.3s ease;">
+                        <h4 class="text-white font-bold uppercase tracking-wider mb-2 text-xs" style="color: white; font-weight: bold;">${store.name}</h4>
+                        <p class="text-gray-400 text-xs mb-2" style="color: #9ca3af; font-size: 12px; margin: 8px 0;">${store.address}</p>
+                        <p class="text-gray-500 text-xs" style="color: #6b7280; font-size: 11px;">${store.hours}</p>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent, {
+                    maxWidth: 250,
+                    className: 'shadow-popup'
+                });
+            });
+        }
+
+        // Initialize map when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+        });
+
+        // Open Cart
+        function openCart() {
+            cartPanel.classList.add('open');
+            cartOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Cart
+        function closeCart() {
+            cartPanel.classList.remove('open');
+            cartOverlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Add to Cart
+        function addToCart(id, name, price, image) {
+            const existingItem = cart.find(item => item.id === id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id,
+                    name,
+                    price,
+                    image,
+                    quantity: 1
+                });
+            }
+            
+            saveCart();
+            updateCartUI();
+            showToast(`${name} ajouté au panier`);
+            
+            // Animate badge
+            cartBadge.classList.remove('cart-badge');
+            void cartBadge.offsetWidth;
+            cartBadge.classList.add('cart-badge');
+        }
+
+        // Remove from Cart
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            saveCart();
+            updateCartUI();
+        }
+
+        // Update Quantity
+        function updateQuantity(id, change) {
+            const item = cart.find(item => item.id === id);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(id);
+                } else {
+                    saveCart();
+                    updateCartUI();
+                }
+            }
+        }
+
+        // Save Cart to LocalStorage
+        function saveCart() {
+            localStorage.setItem('shadowwear_cart', JSON.stringify(cart));
+        }
+
+        // Update Cart UI
+        function updateCartUI() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const discount = (totalPrice * discountPercent) / 100;
+            const finalPrice = totalPrice - discount;
+            
+            if (totalItems > 0) {
+                cartBadge.textContent = totalItems;
+                cartBadge.classList.remove('hidden');
+            } else {
+                cartBadge.classList.add('hidden');
+            }
+            
+            cartCountHeader.textContent = `(${totalItems})`;
+            cartSubtotal.textContent = `${totalPrice.toFixed(2)}€`;
+            
+            if (discountPercent > 0) {
+                discountSection.classList.remove('hidden');
+                discountAmount.textContent = `-${discount.toFixed(2)}€`;
+                cartTotal.textContent = `${finalPrice.toFixed(2)}€`;
+            } else {
+                discountSection.classList.add('hidden');
+                cartTotal.textContent = `${totalPrice.toFixed(2)}€`;
+            }
+            
+            if (cart.length > 0) {
+                cartFooter.classList.remove('hidden');
+                emptyCart.classList.add('hidden');
+                
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="cart-item-enter flex gap-4 bg-white/5 border border-white/10 p-4 rounded-sm">
+                        <div class="w-20 h-20 bg-[#111] border border-white/10 flex-shrink-0 overflow-hidden">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover grayscale">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-white font-bold text-sm uppercase tracking-tight truncate">${item.name}</h4>
+                            <p class="text-gray-500 text-xs mt-1">${item.price.toFixed(2)}€${item.size ? ` - Taille ${item.size}` : ''}</p>
+                            <div class="flex items-center gap-3 mt-3">
+                                <button onclick="updateQuantity('${item.id}', -1)" class="w-7 h-7 border border-white/20 text-white hover:bg-white/10 transition-colors flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                    </svg>
+                                </button>
+                                <span class="text-white font-mono text-sm w-6 text-center">${item.quantity}</span>
+                                <button onclick="updateQuantity('${item.id}', 1)" class="w-7 h-7 border border-white/20 text-white hover:bg-white/10 transition-colors flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end justify-between">
+                            <button onclick="removeFromCart('${item.id}')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                            <span class="text-white font-mono text-sm">${(item.price * item.quantity).toFixed(2)}€</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                cartFooter.classList.add('hidden');
+                emptyCart.classList.remove('hidden');
+                cartItems.innerHTML = '';
+                cartItems.appendChild(emptyCart);
+            }
+        }
+
+        // Show Toast Notification
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Apply Promo Code
+        function applyPromo() {
+            const code = promoInput.value.toUpperCase().trim();
+            
+            if (!code) {
+                promoMessage.textContent = 'Entrez un code';
+                promoMessage.className = 'text-xs text-red-400 h-4';
+                return;
+            }
+            
+            if (promoCodes[code]) {
+                appliedPromo = code;
+                discountPercent = promoCodes[code];
+                promoInput.value = '';
+                promoMessage.textContent = `✓ Code "${code}" appliqué (-${discountPercent}%)`;
+                promoMessage.className = 'text-xs text-green-400 h-4';
+                updateCartUI();
+                showToast(`Réduction de ${discountPercent}% appliquée !`);
+            } else {
+                promoMessage.textContent = 'Code invalide';
+                promoMessage.className = 'text-xs text-red-400 h-4';
+                appliedPromo = null;
+                discountPercent = 0;
+                updateCartUI();
+            }
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Fonction pour activer la vue 3D
+        function activate3D(button) {
+            const container = button.closest('.relative');
+            const img = container.querySelector('.static-img');
+            const model = container.querySelector('.hidden-3d');
+            
+            img.classList.add('opacity-0');
+            button.parentElement.classList.add('hidden');
+            
+            model.classList.remove('opacity-0', 'pointer-events-none');
+            model.classList.add('opacity-100');
+        }
+
+        // Simple scroll reveal effect
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            sections.forEach(sec => {
+                const top = window.scrollY;
+                const offset = sec.offsetTop - 300;
+                const height = sec.offsetHeight;
+                if (top >= offset && top < offset + height) {
+                    sec.classList.add('opacity-100');
+                    sec.classList.remove('opacity-50');
+                } else {
+                    sec.classList.add('opacity-50');
+                }
+            });
+        });
+    </script>
+
+    <!-- Footer Moderne Fixe -->
+    <footer class="fixed bottom-0 left-0 w-full bg-black/95 backdrop-blur-md border-t border-white/10 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-2">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-2">
+                <div class="flex items-center gap-6 text-[11px]">
+                    <div class="text-xs gothic-font tracking-tighter text-white">S<span class="text-gray-600">W</span></div>
+                    <p class="text-gray-600">© 2026 ShadowWear</p>
+                </div>
+                <div class="flex gap-4 text-[10px]">
+                    <a href="#home" class="text-gray-400 uppercase tracking-wider hover:text-white transition-colors">Accueil</a>
+                    <a href="#collection" class="text-gray-400 uppercase tracking-wider hover:text-white transition-colors">Collection</a>
+                    <a href="#contact" class="text-gray-400 uppercase tracking-wider hover:text-white transition-colors">Contact</a>
+                </div>
+                <div class="flex gap-2">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 002.856-3.516 9.969 9.969 0 01-2.825.776 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0m5.521 17.954c-1.811 1.809-4.335 2.805-6.938 2.805-2.603 0-5.127-.996-6.938-2.805-1.809-1.812-2.804-4.335-2.804-6.938 0-2.603.995-5.126 2.804-6.938 1.811-1.809 4.335-2.805 6.938-2.805 2.603 0 5.127.996 6.938 2.805 1.809 1.812 2.804 4.335 2.804 6.938 0 2.603-.995 5.126-2.804 6.938z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        body {
+            padding-bottom: 50px;
+        }
+    </style>
+
+    <script>
+        // Add to Cart with Size Selection
+        function addToCartWithSize(id, name, price, image) {
+            const button = event.target.closest('.add-to-cart-btn');
+            const productCard = button.closest('.product-card');
+            const selectedSizeBtn = productCard.querySelector('.size-btn.selected');
+            
+            if (!selectedSizeBtn) {
+                showToast('Veuillez sélectionner une taille');
+                return;
+            }
+            
+            const size = selectedSizeBtn.getAttribute('data-size');
+            const uniqueId = `${id}-${size}`;
+            
+            const existingItem = cart.find(item => item.id === uniqueId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: uniqueId,
+                    name,
+                    price,
+                    image,
+                    quantity: 1,
+                    size: size
+                });
+            }
+            
+            saveCart();
+            updateCartUI();
+            showToast(`${name} (Taille ${size}) ajouté au panier`);
+            
+            cartBadge.classList.remove('cart-badge');
+            void cartBadge.offsetWidth;
+            cartBadge.classList.add('cart-badge');
+            
+            selectedSizeBtn.classList.remove('selected');
+        }
+
+        // Initialize size buttons
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const parent = this.parentElement;
+                parent.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected', 'bg-white/20', 'border-white'));
+                this.classList.add('selected', 'bg-white/20', 'border-white');
+            });
+        });
+
+        // Checkout Functions
+        const checkoutOverlay = document.getElementById('checkoutOverlay');
+        const checkoutForm = document.getElementById('checkoutForm');
+        const cardNumber = document.getElementById('cardNumber');
+
+        function goToCheckout() {
+            if (cart.length === 0) {
+                showToast('Votre panier est vide');
+                return;
+            }
+            closeCart();
+            checkoutOverlay.classList.remove('hidden');
+            updateCheckoutSummary();
+        }
+
+        function closeCheckout() {
+            checkoutOverlay.classList.add('hidden');
+        }
+
+        function updateCheckoutSummary() {
+            const summaryDiv = document.getElementById('checkoutSummary');
+            const totalSpan = document.getElementById('checkoutTotal');
+            
+            let html = '';
+            cart.forEach(item => {
+                html += `<div class="flex justify-between"><span>${item.name} x${item.quantity}</span><span>${(item.price * item.quantity).toFixed(2)}€</span></div>`;
+            });
+            
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const discount = (subtotal * discountPercent) / 100;
+            const total = subtotal - discount;
+            
+            if (discountPercent > 0) {
+                html += `<div class="text-green-400">Réduction (-${discountPercent}%): -${discount.toFixed(2)}€</div>`;
+            }
+            
+            summaryDiv.innerHTML = html;
+            totalSpan.textContent = total.toFixed(2) + '€';
+        }
+
+        // Format card number with spaces
+        cardNumber.addEventListener('input', function() {
+            let value = this.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            this.value = formattedValue;
+        });
+
+        // Submit Payment
+        function submitPayment(event) {
+            event.preventDefault();
+            
+            // Validation simple
+            const cardNum = cardNumber.value.replace(/\s/g, '');
+            if (cardNum.length !== 16) {
+                showToast('Numéro de carte invalide');
+                return;
+            }
+
+            // Simulate payment processing
+            const submitBtn = checkoutForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Traitement...';
+
+            setTimeout(() => {
+                // Clear cart
+                cart = [];
+                saveCart();
+                updateCartUI();
+                
+                // Reset form
+                checkoutForm.reset();
+                
+                // Close checkout
+                closeCheckout();
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                
+                // Show success message
+                showToast('✓ Paiement réussi ! Commande confirmée');
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 2000);
+        }
+
+        // Close checkout when clicking overlay
+        checkoutOverlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCheckout();
+            }
+        });
+
+        // Timeline Scroll Animation
+        function initTimelineAnimation() {
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Ajouter un léger délai pour chaque item
+                        const index = Array.from(timelineItems).indexOf(entry.target);
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, index * 150); // 150ms de délai entre chaque
+                    }
+                });
+            }, observerOptions);
+            
+            timelineItems.forEach(item => observer.observe(item));
+        }
+
+        // Initialiser les animations de timeline quand le document est chargé
+        document.addEventListener('DOMContentLoaded', () => {
+            initTimelineAnimation();
+            initLanguage();
+        });
+
+        // Language System
+        let currentLanguage = localStorage.getItem('language') || 'fr';
+
+        const translations = {
+  'fr': {
+    'hero-tagline': "L'art de rester dans l'ombre",
+    'hero-desc': "Ne pas chercher la lumière des projecteurs, mais imposer son style par son attitude. Authentique. Brut. Souterrain.",
+    'histoire-titre': "Notre Histoire",
+    'histoire-subtitle': "De Bucarest à aujourd'hui",
+    'histoire-heritage': "Héritage de Bucarest",
+    'histoire-bucarest': "ShadowWear est née dans les ruelles sombres de <span class='text-white font-semibold text-shadow-glow'>Bucarest</span> en Roumanie. Là où la lumière des projecteurs ne pénètre pas, mais où le style s'impose par la force de l'attitude.",
+    'histoire-2007': "Tout a commencé en <span class='text-white text-shadow-glow'>octobre 2007</span> avec un groupe de créateurs passionnés par la culture urbaine, le skate et le hip-hop. Leur idée était simple : créer une marque qui représente ceux qui vivent dans l'ombre, loin des tendances imposées.",
+    'histoire-armure': "Chaque pièce est pensée comme une <span class='text-white font-semibold italic text-shadow-glow'>armure pour la rue</span>, un symbole d'identité pour ceux qui refusent de se fondre dans la masse.",
+    'timeline-2007-titre': "Les Origines",
+    'timeline-2007-subtitle': "Une naissance dans l'ombre",
+    'timeline-2007-desc': "ShadowWear voit le jour en octobre 2007, au cœur des ruelles sombres de Bucarest, une métropole roumaine où l'underground dicte ses propres codes. C'est là, loin des projecteurs mais au plus près de la rue, qu'un groupe de créateurs passionnés imagine une marque différente, authentique, brute.",
+    'timeline-2008-titre': "La Vision",
+    'timeline-2008-subtitle': "Donner une voix à ceux qui vivent dans l'ombre",
+    'timeline-2008-desc': "Les fondateurs, tous plongés dans la culture skate, hip-hop et art urbain, partagent une idée simple : créer une marque pour ceux qui ne suivent pas les tendances… mais les inspirent. ShadowWear devient rapidement plus qu'un nom : un symbole.",
+    'timeline-2008-shadow': "Shadow : la discrétion, le mystère, la présence silencieuse mais puissante",
+    'timeline-2008-wear': "Wear : l'expression personnelle, le style comme langage universel",
+    'timeline-2017-titre': "Les Premières Créations",
+    'timeline-2017-subtitle': "L'armure de la rue",
+    'timeline-2017-desc': "Au lancement, la marque propose des hoodies et t-shirts en édition limitée, ornés de designs inspirés des graffitis et des textures urbaines. Chaque pièce est conçue comme une véritable armure urbaine, pensée pour représenter l'identité de ceux qui refusent de se fondre dans la masse.",
+    'timeline-2019-titre': "L'Émergence d'un Mouvement",
+    'timeline-2019-desc1': "Très vite, ShadowWear dépasse le simple vêtement pour devenir une communauté",
+    'timeline-2019-desc2': "La marque évolue, portée par l'énergie de ceux qui vivent la rue comme un terrain d'expression.",
+    'timeline-2026-titre': "ShadowWear Aujourd'hui",
+    'timeline-2026-subtitle': "Le streetwear premium venu de l'ombre",
+    'timeline-2026-desc1': "Au fil des années, ShadowWear s'impose comme une référence du streetwear premium. La marque mêle aujourd'hui",
+    'timeline-2026-esthétique': "esthétique brute",
+    'timeline-2026-qualite': "qualité haut de gamme",
+    'timeline-2026-designs': "designs narratifs, avec des collections qui racontent une histoire à chaque saison — toujours fidèle à ses racines urbaines",
+    'timeline-2026-desc2': "ShadowWear n'est plus seulement une marque. C'est un héritage, un état d'esprit, un mouvement né dans l'ombre.",
+    'timeline-shadow-meaning': "Shadow",
+    'timeline-shadow-desc': "Symbole de mystère, de discrétion et de profondeur. Pour ceux qui imposent leur style par leur attitude plutôt que par le besoin d'être vus.",
+    'timeline-wear-meaning': "Wear",
+    'timeline-wear-desc': "Revendiquer son identité. Une extension de la personnalité sans compromis, transformant le vêtement en langage universel.",
+    'timeline-continue': "L'ombre continue...",
+    'nav-accueil': 'Accueil',
+    'nav-histoire': 'Histoire',
+    'nav-collection': 'Collection',
+    'nav-avis': 'Avis',
+    'nav-sponsor': 'Sponsor',
+    'nav-magasins': 'Magasins',
+    'nav-organigramme': 'Organigramme',
+    'nav-contact': 'Contact',
+    'btn-decouvrir': 'Découvrir la collection',
+    'btn-histoire': 'Notre histoire',
+    'paiement-titre': 'Paiement',
+    'paiement-resume': 'Résumé de la commande',
+    'paiement-perso': 'Informations personnelles',
+    'paiement-livraison': 'Adresse de livraison',
+    'paiement-info': 'Informations de paiement',
+    'paiement-nom': 'Nom du titulaire',
+    'paiement-carte': 'Numéro de carte (16 chiffres)',
+    'paiement-date': 'MM/AA',
+    'paiement-cvv': 'CVV',
+    'panier-titre': 'Panier',
+    'panier-vide': 'Votre panier est vide',
+    'panier-promo': 'Code Promotionnel',
+    'panier-subtotal': 'Sous-total',
+    'panier-livraison': 'Livraison',
+    'panier-total': 'Total',
+    'panier-commander': 'Passer la commande',
+    'panier-continuer': 'Continuer les achats',
+    'footer-moyens': 'Moyens de paiement acceptés',
+    'collection-titre': 'Collection 001',
+    'collection-subtitle': 'Esthétique brute & Qualité Premium',
+    'btn-voir-tout': 'VOIR TOUT',
+    'avis-titre': 'Avis Clients',
+    'avis-subtitle': 'Découvrez ce que nos clients pensent de la collection ShadowWear. Des avis authentiques qui témoignent de la qualité de nos créations.',
+    'sponsor-titre': 'Sponsors',
+    'sponsor-subtitle': 'ShadowWear s\'entoure de talents et créateurs reconnus pour amplifier sa vision unique.',
+    'magasins-titre': 'Nos Magasins',
+    'magasins-subtitle': 'Découvrez nos points de vente à travers l\'Europe. De Bucarest à Paris, vivez l\'expérience ShadowWear en boutique.',
+    'organigramme-titre': 'Organigramme',
+    'organigramme-subtitle': 'Structure interne de ShadowWear. Cliquez sur une personne pour consulter sa fiche de poste en PDF.'
+  },
+  'en': {
+    'hero-tagline': "The art of staying in the shadow",
+    'hero-desc': "Don't seek the spotlight, but impose your style through your attitude. Authentic. Raw. Underground.",
+    'histoire-titre': "Our Story",
+    'histoire-subtitle': "From Bucharest to today",
+    'histoire-heritage': "Bucharest Legacy",
+    'histoire-bucarest': "ShadowWear was born in the dark streets of Bucharest, Romania. Where the spotlight doesn't penetrate, but where style is imposed by the force of attitude.",
+    'histoire-2007': "It all started in October 2007 with a group of creators passionate about urban culture, skateboarding and hip-hop. Their idea was simple: create a brand that represents those who live in the shadow, far from imposed trends.",
+    'histoire-armure': "Each piece is conceived as armor for the street, a symbol of identity for those who refuse to blend in.",
+    'timeline-2007-titre': "The Origins",
+    'timeline-2007-subtitle': "A birth in the shadow",
+    'timeline-2007-desc': "ShadowWear comes to life in October 2007, in the heart of the dark streets of Bucharest, a Romanian metropolis where the underground dictates its own codes. There, far from the spotlight but closest to the street, a group of passionate creators imagines a different, authentic, raw brand.",
+    'timeline-2008-titre': "The Vision",
+    'timeline-2008-subtitle': "Giving a voice to those who live in the shadow",
+    'timeline-2008-desc': "The founders, all immersed in skateboarding, hip-hop and urban art culture, share a simple idea: create a brand for those who don't follow trends… but inspire them. ShadowWear quickly becomes more than a name: a symbol.",
+    'timeline-2008-shadow': "Shadow: discretion, mystery, silent but powerful presence",
+    'timeline-2008-wear': "Wear: personal expression, style as a universal language",
+    'timeline-2017-titre': "The First Creations",
+    'timeline-2017-subtitle': "The armor of the street",
+    'timeline-2017-desc': "At launch, the brand offers hoodies and t-shirts in limited edition, adorned with designs inspired by graffiti and urban textures. Each piece is designed as true urban armor, intended to represent the identity of those who refuse to blend in.",
+    'timeline-2019-titre': "The Emergence of a Movement",
+    'timeline-2019-desc1': "Very quickly, ShadowWear transcends mere clothing to become a community",
+    'timeline-2019-desc2': "The brand evolves, driven by the energy of those who live the street as a field of expression.",
+    'timeline-2026-titre': "ShadowWear Today",
+    'timeline-2026-subtitle': "Premium streetwear from the shadow",
+    'timeline-2026-desc1': "Over the years, ShadowWear has established itself as a reference in premium streetwear. The brand today combines",
+    'timeline-2026-esthétique': "raw aesthetic",
+    'timeline-2026-qualite': "high-end quality",
+    'timeline-2026-designs': "narrative designs, with collections that tell a story each season — always true to its urban roots",
+    'timeline-2026-desc2': "ShadowWear is no longer just a brand. It's a legacy, a mindset, a movement born in the shadow.",
+    'timeline-shadow-meaning': "Shadow",
+    'timeline-shadow-desc': "Symbol of mystery, discretion and depth. For those who impose their style through their attitude rather than the need to be seen.",
+    'timeline-wear-meaning': "Wear",
+    'timeline-wear-desc': "Reclaim your identity. An extension of personality without compromise, transforming clothing into a universal language.",
+    'timeline-continue': "The shadow continues...",
+    'nav-accueil': 'Home',
+    'nav-histoire': 'History',
+    'nav-collection': 'Collection',
+    'nav-avis': 'Reviews',
+    'nav-sponsor': 'Sponsor',
+    'nav-magasins': 'Stores',
+    'nav-organigramme': 'Organigram',
+    'nav-contact': 'Contact',
+    'btn-decouvrir': 'Discover the collection',
+    'btn-histoire': 'Our story',
+    'paiement-titre': 'Payment',
+    'paiement-resume': 'Order Summary',
+    'paiement-perso': 'Personal Information',
+    'paiement-livraison': 'Shipping Address',
+    'paiement-info': 'Payment Information',
+    'paiement-nom': 'Cardholder Name',
+    'paiement-carte': 'Card Number (16 digits)',
+    'paiement-date': 'MM/YY',
+    'paiement-cvv': 'CVV',
+    'panier-titre': 'Cart',
+    'panier-vide': 'Your cart is empty',
+    'panier-promo': 'Promo Code',
+    'panier-subtotal': 'Subtotal',
+    'panier-livraison': 'Shipping',
+    'panier-total': 'Total',
+    'panier-commander': 'Proceed to Checkout',
+    'panier-continuer': 'Continue Shopping',
+    'footer-moyens': 'Accepted Payment Methods',
+    'collection-titre': 'Collection 001',
+    'collection-subtitle': 'Raw Aesthetic & Premium Quality',
+    'btn-voir-tout': 'SEE ALL',
+    'avis-titre': 'Customer Reviews',
+    'avis-subtitle': 'Discover what our customers think of the ShadowWear collection. Authentic reviews that testify to the quality of our creations.',
+    'sponsor-titre': 'Sponsors',
+    'sponsor-subtitle': 'ShadowWear surrounds itself with talented creators recognized for amplifying its unique vision.',
+    'magasins-titre': 'Our Stores',
+    'magasins-subtitle': 'Discover our retail locations across Europe. From Bucharest to Paris, experience ShadowWear in store.',
+    'organigramme-titre': 'Organization Chart',
+    'organigramme-subtitle': 'Internal structure of ShadowWear. Click on a person to view their job description in PDF.'
+  },
+  'ro': {
+    'hero-tagline': "Arta de a rămâne în umbră",
+    'hero-desc': "Nu cauta reflectoarele, ci impune-ți stilul prin atitudine. Autentic. Brut. Subteran.",
+    'histoire-titre': "Povestea Noastră",
+    'histoire-subtitle': "De la București la azi",
+    'histoire-heritage': "Moștenirea din București",
+    'histoire-bucarest': "ShadowWear s-a născut în străzile întunecate ale Bucureștiului, România. Unde lumina reflectoarelor nu pătrunde, dar unde stilul se impune prin forța atitudinii.",
+    'histoire-2007': "Totul a început în octombrie 2007 cu un grup de creatori pasionați de cultura urbană, skateboard și hip-hop. Ideea lor era simplă: creează o marcă care să reprezinte pe cei care trăiesc în umbră, departe de tendințele impuse.",
+    'histoire-armure': "Fiecare piesă este gândită ca o armură pentru stradă, simbol de identitate pentru cei care refuză să se topească în mulțime.",
+    'timeline-2007-titre': "Originile",
+    'timeline-2007-subtitle': "O naștere în umbră",
+    'timeline-2007-desc': "ShadowWear ia viață în octombrie 2007, în inima străzilor întunecate ale Bucureștiului, metropolă română unde subcultura dicteaza propriile reguli. Acolo, departe de reflectoare dar cea mai aproape de stradă, un grup de creatori pasionați imaginează o marcă diferită, autentică, brută.",
+    'timeline-2008-titre': "Viziunea",
+    'timeline-2008-subtitle': "A da voce celor care trăiesc în umbră",
+    'timeline-2008-desc': "Fondatorii, toți scufundați în cultura skateboard, hip-hop și arta urbană, împărtășesc o idee simplă: creează o marcă pentru cei care nu urmăresc tendințele… ci le inspiră. ShadowWear devine rapid mai mult decât un nume: un simbol.",
+    'timeline-2008-shadow': "Shadow: discreție, mister, prezență tăcută dar puternică",
+    'timeline-2008-wear': "Wear: exprimare personală, stilul ca limbaj universal",
+    'timeline-2017-titre': "Primele Creații",
+    'timeline-2017-subtitle': "Armura străzii",
+    'timeline-2017-desc': "La lansare, marca oferă hanorace și tricouri în ediție limitată, decorate cu design-uri inspirate de graffiti și texturi urbane. Fiecare piesă este concepută ca o adevărată armură urbană, gândită să reprezinte identitatea celor care refuză să se topească în mulțime.",
+    'timeline-2019-titre': "Apariția unui Mișcari",
+    'timeline-2019-desc1': "Foarte rapid, ShadowWear depășește simple haine pentru a deveni o comunitate",
+    'timeline-2019-desc2': "Marca evoluează, purtată de energia celor care trăiesc strada ca teren de exprimare.",
+    'timeline-2026-titre': "ShadowWear Astazi",
+    'timeline-2026-subtitle': "Streetwear premium din umbră",
+    'timeline-2026-desc1': "De-a lungul anilor, ShadowWear s-a impus ca referință în streetwear premium. Marca combină astazi",
+    'timeline-2026-esthétique': "estetică brută",
+    'timeline-2026-qualite': "calitate de înaltă gamă",
+    'timeline-2026-designs': "design-uri narative, cu colecții care povestesc o poveste la fiecare sezon — mereu fidel rădăcinilor urbane",
+    'timeline-2026-desc2': "ShadowWear nu mai este doar o marcă. E o moștenire, o mentalitate, o mișcare născută în umbră.",
+    'timeline-shadow-meaning': "Shadow",
+    'timeline-shadow-desc': "Simbol al misterului, discreției și profunzimii. Pentru cei care se impun prin atitudine mai degrabă decât prin nevoia de a fi văzuți.",
+    'timeline-wear-meaning': "Wear",
+    'timeline-wear-desc': "Revendică-ți identitatea. O extensie a personalității fără compromis, transformând hainele în limbaj universal.",
+    'timeline-continue': "Umbra continuă...",
+    'nav-accueil': 'Acasă',
+    'nav-histoire': 'Istorie',
+    'nav-collection': 'Colecție',
+    'nav-avis': 'Recenzii',
+    'nav-sponsor': 'Sponsor',
+    'nav-magasins': 'Magazine',
+    'nav-organigramme': 'Organigramă',
+    'nav-contact': 'Contact',
+    'btn-decouvrir': 'Descoperiți colecția',
+    'btn-histoire': 'Povestea noastră',
+    'paiement-titre': 'Plată',
+    'paiement-resume': 'Rezumatul comenzii',
+    'paiement-perso': 'Informații personale',
+    'paiement-livraison': 'Adresa de livrare',
+    'paiement-info': 'Informații de plată',
+    'paiement-nom': 'Numele titularului',
+    'paiement-carte': 'Numărul cardului (16 cifre)',
+    'paiement-date': 'LL/AA',
+    'paiement-cvv': 'CVV',
+    'panier-titre': 'Coș',
+    'panier-vide': 'Coșul dvs. este gol',
+    'panier-promo': 'Cod Promotional',
+    'panier-subtotal': 'Subtotal',
+    'panier-livraison': 'Livrare',
+    'panier-total': 'Total',
+    'panier-commander': 'Continuă cu plata',
+    'panier-continuer': 'Continuă cumpărăturile',
+    'footer-moyens': 'Metode de plată acceptate',
+    'collection-titre': 'Colecția 001',
+    'collection-subtitle': 'Estetică brută și Calitate Premium',
+    'btn-voir-tout': 'VEDERE TOTALĂ',
+    'avis-titre': 'Recenzii Clienți',
+    'avis-subtitle': 'Descoperiți ce gândesc clienții noștri despre colecția ShadowWear. Recenzii autentice care atestă calitatea creațiilor noastre.',
+    'sponsor-titre': 'Sponsori',
+    'sponsor-subtitle': 'ShadowWear se înconjoară cu creatori talentați recunoscuți pentru amplificarea viziunii sale unice.',
+    'magasins-titre': 'Magazinele Noastre',
+    'magasins-subtitle': 'Descoperiți punctele noastre de vânzare în toată Europa. De la București la Paris, experimentați ShadowWear în magazin.',
+    'organigramme-titre': 'Organigrama',
+    'organigramme-subtitle': 'Structura internă a ShadowWear. Faceți clic pe o persoană pentru a vedea descrierea postului ei în PDF.'
+  },
+  'es': {
+    'hero-tagline': "El arte de permanecer en la sombra",
+    'hero-desc': "No busques los reflectores, impón tu estilo a través de tu actitud. Auténtico. Crudo. Subterráneo.",
+    'histoire-titre': "Nuestra Historia",
+    'histoire-subtitle': "De Bucarest a hoy",
+    'histoire-heritage': "Legado de Bucarest",
+    'histoire-bucarest': "ShadowWear nació en las calles oscuras de Bucarest, Rumania. Donde la luz de los reflectores no penetra, pero donde el estilo se impone por la fuerza de la actitud.",
+    'histoire-2007': "Todo comenzó en octubre de 2007 con un grupo de creadores apasionados por la cultura urbana, el skateboarding y el hip-hop. Su idea era simple: crear una marca que representara a quienes viven en la sombra, lejos de las tendencias impuestas.",
+    'histoire-armure': "Cada pieza está diseñada como una armadura para la calle, un símbolo de identidad para quienes se niegan a pasar desapercibidos.",
+    'timeline-2007-titre': "Los Orígenes",
+    'timeline-2007-subtitle': "Un nacimiento en la sombra",
+    'timeline-2007-desc': "ShadowWear cobra vida en octubre de 2007, en el corazón de las calles oscuras de Bucarest, una metrópolis rumana donde el underground dicta sus propios códigos. Allí, lejos de los reflectores pero más cerca de la calle, un grupo de creadores apasionados imagina una marca diferente, auténtica, cruda.",
+    'timeline-2008-titre': "La Visión",
+    'timeline-2008-subtitle': "Dar voz a quienes viven en la sombra",
+    'timeline-2008-desc': "Los fundadores, todos inmersos en la cultura del skateboarding, hip-hop y arte urbano, comparten una idea simple: crear una marca para quienes no siguen las tendencias… sino que las inspiran. ShadowWear rápidamente se convierte en algo más que un nombre: un símbolo.",
+    'timeline-2008-shadow': "Shadow: discreción, misterio, presencia silenciosa pero poderosa",
+    'timeline-2008-wear': "Wear: expresión personal, el estilo como lenguaje universal",
+    'timeline-2017-titre': "Las Primeras Creaciones",
+    'timeline-2017-subtitle': "La armadura de la calle",
+    'timeline-2017-desc': "En el lanzamiento, la marca ofrece sudaderas y camisetas en edición limitada, adornadas con diseños inspirados en graffitis y texturas urbanas. Cada pieza está diseñada como una verdadera armadura urbana, pensada para representar la identidad de quienes se niegan a pasar desapercibidos.",
+    'timeline-2019-titre': "El Surgimiento de un Movimiento",
+    'timeline-2019-desc1': "Muy rápidamente, ShadowWear trasciende la ropa para convertirse en una comunidad",
+    'timeline-2019-desc2': "La marca evoluciona, impulsada por la energía de quienes viven la calle como un campo de expresión.",
+    'timeline-2026-titre': "ShadowWear Hoy",
+    'timeline-2026-subtitle': "Streetwear premium de la sombra",
+    'timeline-2026-desc1': "A lo largo de los años, ShadowWear se ha establecido como referencia en el streetwear premium. La marca hoy combina",
+    'timeline-2026-esthétique': "estética cruda",
+    'timeline-2026-qualite': "calidad de gama alta",
+    'timeline-2026-designs': "diseños narrativos, con colecciones que cuentan una historia cada temporada — siempre fiel a sus raíces urbanas",
+    'timeline-2026-desc2': "ShadowWear ya no es solo una marca. Es un legado, una mentalidad, un movimiento nacido en la sombra.",
+    'timeline-shadow-meaning': "Shadow",
+    'timeline-shadow-desc': "Símbolo de misterio, discreción y profundidad. Para quienes imponen su estilo a través de su actitud en lugar de la necesidad de ser vistos.",
+    'timeline-wear-meaning': "Wear",
+    'timeline-wear-desc': "Reclama tu identidad. Una extensión de la personalidad sin compromisos, transformando la ropa en lenguaje universal.",
+    'timeline-continue': "La sombra continúa...",
+    'nav-accueil': 'Inicio',
+    'nav-histoire': 'Historia',
+    'nav-collection': 'Colección',
+    'nav-avis': 'Reseñas',
+    'nav-sponsor': 'Patrocinador',
+    'nav-magasins': 'Tiendas',
+    'nav-organigramme': 'Organigrama',
+    'nav-contact': 'Contacto',
+    'btn-decouvrir': 'Descubre la colección',
+    'btn-histoire': 'Nuestra historia',
+    'paiement-titre': 'Pago',
+    'paiement-resume': 'Resumen del pedido',
+    'paiement-perso': 'Información personal',
+    'paiement-livraison': 'Dirección de envío',
+    'paiement-info': 'Información de pago',
+    'paiement-nom': 'Nombre del titular',
+    'paiement-carte': 'Número de tarjeta (16 dígitos)',
+    'paiement-date': 'MM/AA',
+    'paiement-cvv': 'CVV',
+    'panier-titre': 'Carrito',
+    'panier-vide': 'Tu carrito está vacío',
+    'panier-promo': 'Código Promocional',
+    'panier-subtotal': 'Subtotal',
+    'panier-livraison': 'Envío',
+    'panier-total': 'Total',
+    'panier-commander': 'Proceder al pago',
+    'panier-continuer': 'Continuar comprando',
+    'footer-moyens': 'Métodos de pago aceptados',
+    'collection-titre': 'Colección 001',
+    'collection-subtitle': 'Estética Bruta y Calidad Premium',
+    'btn-voir-tout': 'VER TODO',
+    'avis-titre': 'Reseñas de Clientes',
+    'avis-subtitle': 'Descubra qué piensan nuestros clientes sobre la colección ShadowWear. Reseñas auténticas que atestiguan la calidad de nuestras creaciones.',
+    'sponsor-titre': 'Patrocinadores',
+    'sponsor-subtitle': 'ShadowWear se rodea de creadores talentosos reconocidos por amplificar su visión única.',
+    'magasins-titre': 'Nuestras Tiendas',
+    'magasins-subtitle': 'Descubra nuestros puntos de venta en toda Europa. De Bucarest a París, vive la experiencia ShadowWear en tienda.',
+    'organigramme-titre': 'Organigrama',
+    'organigramme-subtitle': 'Estructura interna de ShadowWear. Haga clic en una persona para ver su descripción de puesto en PDF.'
+  },
+  'el': {
+    'hero-tagline': "Η τέχνη του να παραμένεις στη σκιά",
+    'hero-desc': "Μην αναζητείς τα φώτα της δημοσιότητας, επιβάλλου το στυλ σου μέσω της στάσης σου. Αυθεντικό. Ακατέργαστο. Υπόγειο.",
+    'histoire-titre': "Η Ιστορία Μας",
+    'histoire-subtitle': "Από το Βουκουρέστι μέχρι σήμερα",
+    'histoire-heritage': "Κληρονομιά του Βουκουρεστίου",
+    'histoire-bucarest': "Το ShadowWear γεννήθηκε στις σκοτεινές οδούς του Βουκουρεστίου, Ρουμανία. Όπου το φως των αντανακλαστών δεν διεισδύει, αλλά όπου το στυλ επιβάλλεται από τη δύναμη της στάσης.",
+    'histoire-2007': "Όλα ξεκίνησαν τον Οκτώβριο του 2007 με μια ομάδα δημιουργών που ήταν παθιασμένη για τον αστικό πολιτισμό, το skateboarding και το hip-hop. Η ιδέα τους ήταν απλή: δημιουργήστε μια μάρκα που αντιπροσωπεύει όσους ζουν στη σκιά, μακριά από τις επιβεβλημένες τάσεις.",
+    'histoire-armure': "Κάθε κομμάτι είναι σκεπτόμενο ως πανοπλία για το δρόμο, σύμβολο ταυτότητας για όσους αρνούνται να χαμε στη μάζα.",
+    'timeline-2007-titre': "Οι Προελεύσεις",
+    'timeline-2007-subtitle': "Μια γέννηση στη σκιά",
+    'timeline-2007-desc': "Το ShadowWear έρχεται στη ζωή τον Οκτώβριο του 2007, στην καρδιά των σκοτεινών οδών του Βουκουρεστίου, μετρόπολη ρουμάνας όπου η υπόγεια κουλτούρα υπαγορεύει τους δικούς της κώδικες. Εκεί, μακριά από τα φώτα της δημοσιότητας αλλά πιο κοντά στο δρόμο, μια ομάδα παθιασμένων δημιουργών φανταζόμαστε μια διαφορετική, αυθεντική, ακατέργαστη μάρκα.",
+    'timeline-2008-titre': "Η Όραση",
+    'timeline-2008-subtitle': "Δίνοντας φωνή σε όσους ζουν στη σκιά",
+    'timeline-2008-desc': "Οι ιδρυτές, όλοι βυθισμένοι στον πολιτισμό skateboarding, hip-hop και αστικής τέχνης, μοιράζονται μια απλή ιδέα: δημιουργήστε μια μάρκα για όσους δεν ακολουθούν τάσεις… αλλά τις εμπνέουν. Το ShadowWear γρήγορα γίνεται περισσότερο από όνομα: σύμβολο.",
+    'timeline-2008-shadow': "Shadow: διακριτικότητα, μυστήριο, σιωπηλή αλλά ισχυρή παρουσία",
+    'timeline-2008-wear': "Wear: προσωπική έκφραση, στυλ ως καθολική γλώσσα",
+    'timeline-2017-titre': "Οι Πρώτες Δημιουργίες",
+    'timeline-2017-subtitle': "Η πανοπλία του δρόμου",
+    'timeline-2017-desc': "Κατά την εκκίνηση, η μάρκα προσφέρει hoodies και κοντά μανίκια σε περιορισμένη έκδοση, στολισμένα με σχέδια εμπνευσμένα από graffiti και αστικές υφές. Κάθε κομμάτι είναι σχεδιασμένο ως πραγματική αστική πανοπλία, σκεπτόμενη να αντιπροσωπεύει την ταυτότητα όσων αρνούνται να χαμε στη μάζα.",
+    'timeline-2019-titre': "Η Εμφάνιση ενός Κινήματος",
+    'timeline-2019-desc1': "Πολύ γρήγορα, το ShadowWear ξεπερνά τα απλά ρούχα για να γίνει κοινότητα",
+    'timeline-2019-desc2': "Η μάρκα εξελίσσεται, κινούμενη από την ενέργεια όσων ζουν το δρόμο ως πεδίο έκφρασης.",
+    'timeline-2026-titre': "ShadowWear Σήμερα",
+    'timeline-2026-subtitle': "Ανώτερη ποιότητας streetwear από τη σκιά",
+    'timeline-2026-desc1': "Τα χρόνια, το ShadowWear έχει καθιερωθει ως αναφορά στο premium streetwear. Η μάρκα σήμερα συνδυάζει",
+    'timeline-2026-esthétique': "ακατέργαστη αισθητική",
+    'timeline-2026-qualite': "ποιότητα κατηγορίας ανώτερης",
+    'timeline-2026-designs': "αφηγηματικά σχέδια, με συλλογές που λένε μια ιστορία κάθε εποχή — πάντα πιστή στις αστικές της ρίζες",
+    'timeline-2026-desc2': "Το ShadowWear δεν είναι πλέον απλά μάρκα. Είναι κληρονομιά, νοοτροπία, κίνημα που γεννήθηκε στη σκιά.",
+    'timeline-shadow-meaning': "Shadow",
+    'timeline-shadow-desc': "Σύμβολο μυστηρίου, διακριτικότητας και βάθους. Για όσους επιβάλλουν το στυλ τους μέσω της στάσης τους παρά την ανάγκη να είναι ορατοί.",
+    'timeline-wear-meaning': "Wear",
+    'timeline-wear-desc': "Διεκδίκησε την ταυτότητά σου. Επέκταση της προσωπικότητας χωρίς συμβιβασμό, μετατρέποντας το ένδυμα σε καθολική γλώσσα.",
+    'timeline-continue': "Η σκιά συνεχίζεται...",
+    'nav-accueil': 'Αρχική',
+    'nav-histoire': 'Ιστορία',
+    'nav-collection': 'Συλλογή',
+    'nav-avis': 'Κριτικές',
+    'nav-sponsor': 'Χορηγός',
+    'nav-magasins': 'Καταστήματα',
+    'nav-organigramme': 'Διάγραμμα',
+    'nav-contact': 'Επικοινωνία',
+    'btn-decouvrir': 'Ανακαλύψτε τη συλλογή',
+    'btn-histoire': 'Η ιστορία μας',
+    'paiement-titre': 'Πληρωμή',
+    'paiement-resume': 'Περίληψη παραγγελίας',
+    'paiement-perso': 'Προσωπικές πληροφορίες',
+    'paiement-livraison': 'Διεύθυνση παράδοσης',
+    'paiement-info': 'Πληροφορίες πληρωμής',
+    'paiement-nom': 'Όνομα κατόχου',
+    'paiement-carte': 'Αριθμός κάρτας (16 ψηφία)',
+    'paiement-date': 'MM/ΕΕ',
+    'paiement-cvv': 'CVV',
+    'panier-titre': 'Καλάθι',
+    'panier-vide': 'Το καλάθι σας είναι άδειο',
+    'panier-promo': 'Κωδικός Προώθησης',
+    'panier-subtotal': 'Ενδιάμεσο Σύνολο',
+    'panier-livraison': 'Αποστολή',
+    'panier-total': 'Σύνολο',
+    'panier-commander': 'Προχώρησε στην Ταμειακή',
+    'panier-continuer': 'Συνέχισε τις Αγορές',
+    'footer-moyens': 'Αποδεκτές Μέθοδοι Πληρωμής',
+    'collection-titre': 'Συλλογή 001',
+    'collection-subtitle': 'Ακατέργαστη Αισθητική & Ποιότητα Premium',
+    'btn-voir-tout': 'ΔΕΙΤΕ ΟΛΑ',
+    'avis-titre': 'Κριτικές Πελατών',
+    'avis-subtitle': 'Ανακαλύψτε τι πιστεύουν οι πελάτες μας για τη συλλογή ShadowWear. Αυθεντικές κριτικές που μαρτυρούν την ποιότητα των δημιουργιών μας.',
+    'sponsor-titre': 'Χορηγοί',
+    'sponsor-subtitle': 'Το ShadowWear περιβάλλεται από ταλαντούχους δημιουργούς που αναγνωρίζονται για την ενίσχυση της μοναδικής του όρασης.',
+    'magasins-titre': 'Τα Καταστήματά Μας',
+    'magasins-subtitle': 'Ανακαλύψτε τα σημεία πώλησής μας σε όλη την Ευρώπη. Από το Βουκουρέστι στο Παρίσι, βιώστε την εμπειρία ShadowWear στο κατάστημα.',
+    'organigramme-titre': 'Διάγραμμα Οργανώσεως',
+    'organigramme-subtitle': 'Εσωτερική δομή του ShadowWear. Κάντε κλικ σε ένα άτομο για να δείτε την περιγραφή της θέσης του σε PDF.'
+  }
+        };
+
+        function initLanguage() {
+            updateLanguage(currentLanguage);
+        }
+
+        function toggleLanguage() {
+            const languages = ['fr', 'en', 'ro', 'es', 'el'];
+            const currentIndex = languages.indexOf(currentLanguage);
+            const newIndex = (currentIndex + 1) % languages.length;
+            setLanguage(languages[newIndex]);
+        }
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('language', lang);
+            updateLanguage(lang);
+        }
+
+        function updateLanguage(lang) {
+            // Mettre à jour le bouton avec l'abréviation de la langue
+            const langAbreviations = { 'fr': 'FR', 'en': 'EN', 'ro': 'RO', 'es': 'ES', 'el': 'EL' };
+            document.getElementById('langText').textContent = langAbreviations[lang] || 'EN';
+
+            // Mettre à jour les éléments avec data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    elem.innerHTML = translations[lang][key];
+                }
+            });
+
+            // Mettre à jour les placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n-placeholder');
+                if (translations[lang] && translations[lang][key]) {
+                    elem.placeholder = translations[lang][key];
+                }
+            });
+        }
+    </script>
+</body>
+</html>
